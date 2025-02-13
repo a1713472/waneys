@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>等待游戏</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #6C63FF;
+            --background-color: #0e1a2b;
+            --text-color: #ffffff;
+            --button-hover-color: #8AB4F8;
+            --button-active-color: #2C65B8;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0e1a2b 0%, #1b2735 100%);
+            font-family: "Roboto", sans-serif;
+            color: var(--text-color);
+        }
+
+        .bkg_img {
+            width: 20%;
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+
+        .resume_game, .exit_login {
+            padding: 15px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .resume_game {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .exit_login {
+            background-color: #FF6B6B;
+            color: var(--text-color);
+        }
+
+        .resume_game:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .exit_login:hover {
+            background-color: #FF5151;
+        }
+
+        .resume_game:active, .exit_login:active {
+            transform: scale(0.98);
+            background-color: var(--button-active-color);
+        }
+
+        .waiting_text {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .bkg_img {
+                width: 30%;
+            }
+
+            .resume_game, .exit_login {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+            }
+
+            .waiting_text {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bkg_img {
+                width: 40%;
+            }
+
+            .resume_game, .exit_login {
+                font-size: 0.8rem;
+                padding: 8px 16px;
+            }
+
+            .waiting_text {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <img src="/static/img/bkg_img.png" alt="背景图片" class="bkg_img">
+    <button type="button" class="exit_login" onclick="exit_login()">退出登录</button>
+    <button type="button" class="resume_game" onclick="resume_game()">我已经在游戏中，直接进入游戏</button>
+    <div class="waiting_text">等待游戏创建中...请稍等</div>
+
+<script>
+    // 防止双指缩放
+    document.documentElement.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    }, false);
+
+    // 防止双击缩放
+    var lastTouchEnd = 0;
+    document.documentElement.addEventListener('touchend', function (event) {
+        var now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+
+    function query() {
+        $.ajax({
+            url: '/index/queryNewGameForAjax',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success' && d === 'exist') {
+                    location.href = '/index/queryNewGame';
+                }
+            },
+            error: function (e) {
+                alert('网络错误:', e);
+            }
+        });
+    }
+
+    function resume_game() {
+        $.ajax({
+            url: '/index/queryIfAtGame',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    if (d === 'game_not_exist') {
+                        alert('游戏不存在！');
+                    } else if (d === 'no_at_game') {
+                        alert('您还未加入游戏！');
+                    } else if (d === 'game_end') {
+                        alert('该游戏已结束！');
+                    } else if (d === 'at_game') {
+                        location.href = '/index/gamePage';
+                    }
+                }
+            },
+            error: function (e) {
+                alert('网络错误:', e);
+            }
+        });
+    }
+
+    function exit_login() {
+        $.ajax({
+            url: '/index/exitLogin',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success' && d === 'suc') {
+                    location.reload();
+                }
+            },
+            error: function (e) {
+                alert('网络错误:', e);
+            }
+        });
+    }
+
+    setInterval(() => {
+        query();
+    }, 1000);
+</script>
+</body>
+</html>

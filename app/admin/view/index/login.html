@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>后台登录</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+
+        html {
+            font-size: 40px;
+        }
+
+        input::-webkit-input-placeholder {
+            font-size: 40px;
+            line-height: 80px;
+            height: 80px;
+            text-indent: 20px;
+        }
+
+        input::-moz-placeholder {
+            font-size: 40px;
+            line-height: 80px;
+            height: 80px;
+            text-indent: 20px;
+        }
+
+        input:-ms-input-placeholder {
+            font-size: 40px;
+            line-height: 80px;
+            height: 80px;
+            text-indent: 20px;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        label {
+            display: block;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .regi_form {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        .regi_form div {
+            margin: 10px 0;
+            flex: 1 1 auto;
+        }
+
+        .regi_form input {
+            width: 700px;
+            height: 80px;
+            border-radius: 20px;
+            line-height: normal;
+            font-size: 40px;
+            padding-left: 20px;
+            border: 1px solid darkgray;
+        }
+
+        .regi_id {
+
+        }
+
+        .regi_btn_con {
+
+        }
+
+        .regi_btn {
+            font-size: inherit;
+            padding: 20px 80px;
+            background-color: #8e94da;
+            color: white;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .to_regi {
+            text-decoration: underline;
+            color: darkgray;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="regi_form">
+    <div style="text-align: center;font-size: 46px;color: deepskyblue;">后台登录页</div>
+    <div class="regi_id">
+        <label for="user_name">用户名</label><input id="user_name" type="text"
+                                                 placeholder="请输入账户名">
+    </div>
+    <div class="regi_psw">
+        <label for="user_psw">密码</label> <input id="user_psw" type="password"
+                                                placeholder="请输入密码">
+    </div>
+<!--    <div>-->
+<!--        <label for="user_captcha">验证码</label> <input id="user_captcha" type="text" maxlength="4"-->
+<!--                                                     placeholder="请输入验证码">-->
+<!--    </div>-->
+<!--    <div>-->
+<!--        <img src="{:captcha_src()}" alt="captcha" width="500" height="150"-->
+<!--             onclick="javascript:this.src=this.src+'?time='+Math.random()" style="cursor: pointer" title="点击更换验证码"-->
+<!--             id="captcha_id"/>-->
+<!--    </div>-->
+    <div class="regi_btn_con">
+        <button type="button" class="regi_btn" onclick="to_login()">
+            登录
+        </button>
+    </div>
+
+</div>
+
+</body>
+<script>
+    function custom_layer($words) {
+        alert($words);
+    }
+
+    //禁止双指放大缩小页面
+    document.documentElement.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    }, false);
+
+    //禁止双击放大缩小页面
+    var lastTouchEnd = 0;
+    document.documentElement.addEventListener('touchend', function (event) {
+        var now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+
+    document.addEventListener("keypress", function (event) {
+        if (event.code === "Enter") { // 或者 event.keyCode === 13
+            // 这里写入当按下回车时要执行的操作
+            to_login();
+        }
+    });
+
+    function to_login() {
+        if ($('#user_name').val() === '' || $('#user_psw').val() === '') {
+            // layer.msg('帐号或密码未填写,请填写');
+            custom_layer('帐号或密码未填写,请填写');
+            return;
+        }
+
+        if (!/^[a-zA-Z][\w]{1,10}$/.test($('#user_name').val())) {
+            custom_layer('帐号首位必须是字母,且帐号只能包含字母、数字、下划线');
+            return;
+        }
+
+        $.ajax({
+            url: '/admin/getlogininfo',
+            type: 'post',
+            data: {
+                id: $('#user_name').val(),
+                psw: $('#user_psw').val(),
+                // captcha: $('#user_captcha').val()
+            },
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    if (d === 'suc') {
+                        custom_layer('登录成功');
+                        location.href = '/admin/mainpage';
+                    } else if (d === 'name_err') {
+                        custom_layer('用户名错误');
+                        $('#captcha_id').prop('src', $('#captcha_id').prop('src') + '?time=' + Math.random());
+                    } else if (d === 'ct_err') {
+                        custom_layer('验证码错误');
+                        $('#captcha_id').prop('src', $('#captcha_id').prop('src') + '?time=' + Math.random());
+                    } else if (d === 'psr_err') {
+                        custom_layer('密码错误');
+                        $('#captcha_id').prop('src', $('#captcha_id').prop('src') + '?time=' + Math.random());
+                    }
+                }
+
+            },
+            error: function (e) {
+                alert('网络错误,错误信息:', e);
+            }
+        })
+    }
+</script>
+</html>

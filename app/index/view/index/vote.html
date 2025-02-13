@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投票页面</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: url('/static/img/vote-background.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: "Microsoft YaHei", sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+            pointer-events: none;  /* 允许点击穿透 */
+        }
+
+        .vote-header {
+            position: relative;
+            z-index: 2;  /* 提高层级 */
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .vote-title {
+            font-size: 36px;
+            color: #FFE4B5;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .vote-status {
+            font-size: 24px;
+            color: #FFE4B5;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .vote-container {
+            position: relative;
+            z-index: 2;  /* 提高层级 */
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 120px;  /* 投票按钮的高度(60px) + 上下padding(20px*2) + 额外空间(20px) */
+        }
+
+        .vote-grid {
+            position: relative;
+            z-index: 2;  /* 提高层级 */
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);  /* 修改为4列 */
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;  /* 限制最大宽度 */
+            margin: 0 auto;  /* 居中显示 */
+            padding-bottom: 100px;
+        }
+
+        .vote-card {
+            position: relative;
+            width: 100%;  /* 修改为100%以适应网格 */
+            max-width: 280px;  /* 限制最大宽度 */
+            height: 100px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;  /* 居中显示 */
+            border: 2px solid transparent;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .vote-card::before {
+            display: none;
+        }
+
+        .vote-card.selected {
+            transform: scale(1.05);
+            border-color: #F5A623;
+            box-shadow: 0 0 20px rgba(245, 166, 35, 0.5);
+        }
+
+        .vote-card:hover {
+            transform: translateY(-5px);
+            border-color: #FFE4B5;
+        }
+
+        .vote-card.out {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .vote-card.out:hover {
+            transform: none;
+            border-color: transparent;
+        }
+
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 3px solid rgba(255, 228, 181, 0.5);
+            transition: all 0.3s ease;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .vote-card:hover .player-avatar {
+            border-color: #FFE4B5;
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .player-number {
+            font-size: 20px;
+            color: #FFE4B5;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .player-name {
+            font-size: 16px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .vote-buttons {
+            position: fixed;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+            z-index: 3;  /* 提高层级 */
+        }
+
+        .vote-submit, .vote-skip {
+            width: 180px;
+            height: 60px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: transparent;
+        }
+
+        .vote-submit {
+            background-image: url('/static/img/提交投票.png');
+        }
+
+        .vote-skip {
+            background-image: url('/static/img/跳过.png');
+        }
+
+        .vote-submit:hover, .vote-skip:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .vote-timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: #FFE4B5;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .vote-timer i {
+            color: #F5A623;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .vote-card.selected .player-avatar {
+            animation: pulse 2s infinite;
+        }
+
+        /* 添加一个占位元素，确保内容不会被固定定位的按钮遮挡 */
+        .vote-buttons-spacer {
+            height: 120px;
+            width: 100%;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="vote-header">
+        <div class="vote-title">投票环节</div>
+        <div class="vote-status" id="vote_status"></div>
+    </div>
+
+    <div class="vote-container">
+        <div class="vote-grid" id="vote_grid"></div>
+        <div class="vote-buttons-spacer"></div>
+    </div>
+
+    <div class="vote-timer" id="vote_timer">
+        <i class="fas fa-clock"></i>
+        <span>剩余时间: <span id="timer_value">60</span>秒</span>
+    </div>
+
+    <div class="vote-buttons">
+        <button class="vote-submit" onclick="submitVote()"></button>
+        <button class="vote-skip" onclick="skipVote()"></button>
+    </div>
+
+    <script>
+        // 全局变量声明
+        let voteTimer;
+        let timeLeft = 60;
+        let out_arr = [];  // 初始化为空数组
+        
+        // 从服务器获取玩家信息
+        let playerInfoMap = {};  // 用于存储玩家信息的映射
+
+        function initOutArr() {
+            $.ajax({
+                url: '/index/gamePage',
+                type: 'get',
+                success: function(d, s, x) {
+                    if (s === 'success' && d.out_arr) {
+                        try {
+                            out_arr = JSON.parse(d.out_arr);
+                            console.log('获取出局玩家数据成功:', out_arr);
+                        } catch (e) {
+                            console.error('解析出局玩家数据失败:', e);
+                            out_arr = [];
+                        }
+                    }
+                },
+                error: function(e) {
+                    console.error('获取出局玩家数据失败:', e);
+                    out_arr = [];
+                }
+            });
+        }
+
+        function unserialize(data) {
+            try {
+                // 处理 PHP 序列化的数组
+                const regex = /a:\d+:\{([^}]+)\}/;
+                const match = data.match(regex);
+                if (!match) return null;
+                
+                const content = match[1];
+                const result = [];
+                let currentObj = {};
+                
+                // 使用正则表达式匹配所有的键值对
+                const keyValuePairs = content.split(/[is]:\d+:/);
+                for (let i = 1; i < keyValuePairs.length; i += 2) {
+                    const key = keyValuePairs[i].match(/"([^"]+)"/)[1];
+                    const value = keyValuePairs[i + 1].match(/"([^"]+)"/)[1];
+                    
+                    if (key === 'game_id') {
+                        if (Object.keys(currentObj).length > 0) {
+                            result.push({...currentObj});
+                            currentObj = {};
+                        }
+                        currentObj.game_id = value;
+                    } else if (key === 'user_name') {
+                        currentObj.user_name = value;
+                        result.push({...currentObj});
+                        currentObj = {};
+                    }
+                }
+                
+                console.log('解析后的玩家数据:', result);
+                return result;
+            } catch (e) {
+                console.error('Unserialize error:', e);
+                console.error('原始数据:', data);
+                return null;
+            }
+        }
+
+        function processUserInfo(data) {
+            console.log('处理用户信息:', data);
+            try {
+                // 如果data是字符串,尝试解析JSON
+                if (typeof data === 'string') {
+                    try {
+                        data = JSON.parse(data);
+                    } catch(e) {
+                        console.log('数据不是JSON格式:', data);
+                        return;
+                    }
+                }
+
+                // 获取users数据
+                if (data && data.users) {
+                    console.log('获取到users数据:', data.users);
+                    data.users.forEach(user => {
+                        if (user.game_id && user.user_name) {
+                            playerInfoMap[user.game_id] = user.user_name;
+                            console.log(`设置玩家 ${user.game_id} 的用户名为 ${user.user_name}`);
+                        }
+                    });
+                }
+                
+                console.log('最终的玩家信息映射:', playerInfoMap);
+                
+                // 更新所有玩家卡片的用户名显示
+                Object.keys(playerInfoMap).forEach(playerId => {
+                    updatePlayerName(playerId);
+                });
+            } catch (e) {
+                console.error('处理用户信息时出错:', e);
+                console.error('原始数据:', data);
+            }
+        }
+
+        function updatePlayerName(playerId) {
+            try {
+                console.log('正在更新玩家名称:', playerId);
+                const playerCard = document.querySelector(`.vote-card[data-player="${playerId}"]`);
+                if (!playerCard) {
+                    console.log(`未找到玩家${playerId}的卡片元素`);
+                    return;
+                }
+
+                const nameElement = playerCard.querySelector('.player-name');
+                if (!nameElement) {
+                    console.log(`未找到玩家${playerId}的名称元素`);
+                    return;
+                }
+
+                const playerName = playerInfoMap[playerId] || `${playerId}号玩家`;
+                console.log(`设置玩家${playerId}的名称为:`, playerName);
+                nameElement.textContent = playerName;
+            } catch (e) {
+                console.error('更新玩家名称时出错:', e);
+            }
+        }
+
+        function createVoteCards(players) {
+            console.log('创建投票卡片,玩家列表:', players);
+            const voteGrid = document.getElementById('vote_grid');
+            if (!voteGrid) {
+                console.error('未找到vote_grid元素');
+                return;
+            }
+            voteGrid.innerHTML = '';
+            
+            // 过滤掉已死亡的玩家
+            const alivePlayers = players.filter(player => !out_arr.includes(parseInt(player)));
+            alivePlayers.sort((a, b) => a - b);
+            
+            // 创建玩家卡片
+            alivePlayers.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'vote-card';
+                card.setAttribute('data-player', player);
+                
+                const avatar = document.createElement('img');
+                avatar.className = 'player-avatar';
+                avatar.src = `/static/touxiang/${player}.jpg`;
+                avatar.onerror = function() {
+                    this.onerror = null;
+                    this.src = '/static/touxiang/default.jpg';
+                };
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'player-info';
+                
+                const number = document.createElement('div');
+                number.className = 'player-number';
+                number.textContent = player + '号玩家';
+                
+                const playerName = document.createElement('div');
+                playerName.className = 'player-name';
+                const userName = playerInfoMap[player] || `${player}号玩家`;
+                console.log(`玩家${player}的用户名:`, userName);
+                playerName.textContent = userName;
+                
+                infoDiv.appendChild(number);
+                infoDiv.appendChild(playerName);
+                card.appendChild(avatar);
+                card.appendChild(infoDiv);
+                
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.vote-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    card.classList.add('selected');
+                    updateVoteStatus(player);
+                });
+                
+                voteGrid.appendChild(card);
+            });
+
+            startVoteTimer();
+            updateVoteStatus();
+        }
+
+        function updateVoteStatus(selectedPlayer = null) {
+            const status = document.getElementById('vote_status');
+            if (selectedPlayer) {
+                status.textContent = `当前选择: ${selectedPlayer}号玩家`;
+            } else {
+                status.textContent = '请选择要投票的玩家';
+            }
+        }
+
+        function startVoteTimer() {
+            timeLeft = 60;
+            updateTimer();
+            
+            if (voteTimer) {
+                clearInterval(voteTimer);
+            }
+            
+            voteTimer = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(voteTimer);
+                    skipVote();
+                }
+            }, 1000);
+        }
+
+        function updateTimer() {
+            document.getElementById('timer_value').textContent = timeLeft;
+        }
+
+        function submitVote() {
+            const selectedCard = document.querySelector('.vote-card.selected');
+            if (!selectedCard) {
+                alert('请选择要投票的玩家');
+                return;
+            }
+            
+            const targetPlayer = selectedCard.getAttribute('data-player');
+            $.ajax({
+                url: '/index/submitVote',
+                type: 'post',
+                data: {
+                    player_gameid: targetPlayer
+                },
+                success: function(d, s, x) {
+                    if (s === 'success') {
+                        switch(d) {
+                            case 'suc':
+                                alert('投票成功！');
+                                localStorage.setItem('voteCompleted', 'true');
+                                window.location.href = '/index/gamePage';
+                                break;
+                            case 'vote_repeat':
+                                alert('您已经投过票了！');
+                                localStorage.setItem('voteCompleted', 'true');
+                                window.location.href = '/index/gamePage';
+                                break;
+                            case 'game_not_exist':
+                                alert('游戏不存在！');
+                                break;
+                            case 'player_not_exist':
+                                alert('玩家不存在！');
+                                break;
+                            case 'vote_self':
+                                alert('不能投自己！');
+                                break;
+                            case 'not_vote_time':
+                                alert('还未到投票时间！');
+                                break;
+                            case 'you_are_out':
+                                alert('您已出局，投票无效！');
+                                break;
+                            case 'target_is_out':
+                                alert('您投票的玩家已出局，投票无效！');
+                                break;
+                            default:
+                                alert(d);
+                                break;
+                        }
+                    }
+                },
+                error: function(e) {
+                    console.log('网络错误:', e);
+                }
+            });
+        }
+
+        function skipVote() {
+            localStorage.setItem('voteCompleted', 'true');
+            window.location.href = '/index/gamePage';
+        }
+
+        function initPlayerInfo() {
+            // 获取玩家列表并创建卡片
+            $.ajax({
+                url: '/index/queryExistPlayer',
+                type: 'get',
+                success: function(players) {
+                    if (Array.isArray(players)) {
+                        // 获取所有玩家的用户名
+                        $.ajax({
+                            url: '/index/getUsers',  // 新的接口,直接从users表获取数据
+                            type: 'get',
+                            success: function(response) {
+                                console.log('获取到的用户信息:', response);
+                                if (response && response.users) {
+                                    processUserInfo(response);
+                                }
+                                // 创建投票卡片
+                                createVoteCards(players);
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('获取用户信息失败:', status, error);
+                                // 即使获取用户信息失败,仍然创建投票卡片
+                                createVoteCards(players);
+                            }
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('获取玩家列表失败:', status, error);
+                }
+            });
+        }
+
+        // 修改页面加载时的初始化
+        $(document).ready(function() {
+            initOutArr();
+            initPlayerInfo();
+            
+            // 定期检查是否还在投票时间
+            setInterval(function() {
+                $.ajax({
+                    url: '/index/queryIfStartVote',
+                    type: 'get',
+                    success: function(d) {
+                        if(d !== 'start') {
+                            window.location.href = '/index/gamePage';
+                        }
+                    }
+                });
+            }, 3000);
+
+            // 定期更新出局玩家数据
+            setInterval(initOutArr, 3000);
+        });
+
+        // 修改投票按钮的生成和事件绑定逻辑
+        function update_vote_stat() {
+            $.ajax({
+                url: '/index/queryVotedPlayer',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        if (d === 'none') {
+                            return;
+                        }
+                        let vote_con = document.getElementById('vote_con_id');
+                        vote_con.innerHTML = '';
+                        
+                        // 使用 document fragment 来提高性能
+                        let fragment = document.createDocumentFragment();
+                        
+                        for (let i = 0; i < d.length; i++) {
+                            let div = document.createElement('div');
+                            div.className = 'vote_item';
+                            
+                            let button = document.createElement('button');
+                            button.className = 'vote_button';
+                            button.setAttribute('data-player-id', d[i].game_id); // 使用 data 属性存储玩家ID
+                            button.innerHTML = d[i].game_id + '号玩家';
+                            
+                            div.appendChild(button);
+                            fragment.appendChild(div);
+                        }
+                        
+                        vote_con.appendChild(fragment);
+                        
+                        // 使用事件委托来处理所有投票按钮的点击
+                        $('#vote_con_id').off('click', '.vote_button').on('click', '.vote_button', function() {
+                            let playerId = $(this).data('player-id');
+                            submit_vote(playerId);
+                        });
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            });
+        }
+
+        // 修改提交投票的函数
+        function submit_vote(player_id) {
+            console.log('Submitting vote for player:', player_id); // 添加调试日志
+            $.ajax({
+                url: '/index/submitVote',
+                type: 'post',
+                data: {
+                    vote_player: player_id
+                },
+                success: function (d, s, x) {
+                    console.log('Vote response:', d, s); // 添加调试日志
+                    if (s === 'success') {
+                        if (d === 'suc') {
+                            alert('投票成功');
+                            // 投票成功后刷新投票状态
+                            update_vote_stat();
+                        } else if (d === 'you_are_not_in_game') {
+                            alert('您未加入该游戏');
+                        } else if (d === 'vote_time_not_start') {
+                            alert('投票未开始');
+                        } else if (d === 'vote_time_end') {
+                            alert('投票已结束');
+                        } else if (d === 'you_have_voted') {
+                            alert('您已投过票');
+                        } else if (d === 'you_are_out') {
+                            alert('您已出局');
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.error('Vote error:', e); // 添加错误日志
+                    alert('网络错误:' + e);
+                }
+            });
+        }
+
+        // 确保在文档加载完成后初始化
+        $(document).ready(function() {
+            // 初始更新投票状态
+            update_vote_stat();
+            
+            // 设置定时刷新
+            setInterval(update_vote_stat, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #6C63FF;
+            --background-color: #F5F7FA;
+            --text-color: #2C3E50;
+            --border-color: #E1E8ED;
+            --hover-color: #3498DB;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .admin_con {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: white;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .main_content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .setting_item {
+            width: 280px;
+            height: 120px;
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .setting_item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+
+        .setting_item:first-child {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .setting_content {
+            display: none;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            margin-top: 2rem;
+        }
+
+        .setting_content:first-child {
+            display: flex;
+        }
+
+        .player_identity_setting {
+            flex-flow: row wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        #player_count {
+            border: 2px solid var(--primary-color);
+            padding: 1rem;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            width: 200px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        #player_count:focus {
+            border-color: var(--secondary-color);
+        }
+
+        .create_new_game {
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            border: none;
+            color: white;
+            margin: 1.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .create_new_game:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .game_content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .player_count_con {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .counter {
+            background-color: var(--primary-color);
+            padding: 0.5rem 2rem;
+            color: white;
+            font-size: 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .counter:hover {
+            background-color: var(--hover-color);
+        }
+
+        #join_player_list_con_id {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .join_player_item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .join_player_item:hover {
+            background-color: var(--background-color);
+        }
+
+        .identity_li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .identity_number {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .identity_li_inner_group,
+        .identity_li_inner_identity,
+        .winner_group_select,
+        .vote_li_inner_vote {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .identity_confirm_button,
+        .vote_count_confirm_button {
+            padding: 1rem 2rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .identity_confirm_button:hover,
+        .vote_count_confirm_button:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        /* 添加响应式设计 */
+        @media (max-width: 768px) {
+            html {
+                font-size: 14px;
+            }
+
+            .setting_item {
+                width: 100%;
+                margin: 1rem 0;
+            }
+
+            .identity_li {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .setting_item_con {
+            width: 260px;
+            height: 100px;
+            border: 1px solid deepskyblue;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 40px 30px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .setting_item:first-child {
+            background-color: deepskyblue;
+            color: white;
+        }
+
+        .setting_content {
+            display: none;
+        }
+
+        .setting_content:first-child {
+            display: flex;
+        }
+
+        .player_identity_setting {
+            flex-flow: row wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+        }
+
+        .setting_item_con {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: space-evenly;
+            align-content: space-evenly;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .setting_content_con {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #player_count {
+            border: 1px solid deepskyblue;
+            padding: 20px;
+            font-size: 35px;
+            border-radius: 20px;
+            width: 200px;
+        }
+
+        .create_new_game {
+            font-size: 35px;
+            padding: 20px 60px;
+            background-color: deepskyblue;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            margin: 30px 0;
+            cursor: pointer;
+        }
+
+        .game_content {
+            display: flex;
+            flex-flow: column nowrap;
+            width: 100%;
+            min-height: 400px;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        .player_count_con {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 35px;
+            margin: 30px 0;
+        }
+
+        .counter {
+            background-color: deepskyblue;
+            padding: 10px 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 50px;
+            margin: 0 40px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #join_player_list_con_id {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: space-evenly;
+            align-items: center;
+            font-size: 35px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            width: 80vw;
+            padding: 20px;
+            margin: 30px 0;
+
+        }
+
+        #join_player_list_con_id div {
+            width: 100%;
+            text-align: center;
+        }
+
+        .join_player_item {
+            margin: 20px;
+            word-break: break-all;
+        }
+
+        #identity_confirm_id {
+            width: 100%;
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: flex-start;
+            align-items: center;
+            align-content: flex-start;
+            box-sizing: border-box;
+        }
+
+        .identity_li {
+            width: 50%;
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: space-between;
+            align-items: center;
+            flex: none;
+            margin: 30px 0;
+            padding: 0 30px;
+            box-sizing: border-box;
+        }
+
+        .identity_number {
+            font-size: 35px;
+            margin-right: 30px;
+        }
+
+        .identity_li_inner_group {
+            font-size: 35px;
+            margin-right: 30px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .identity_li_inner_identity {
+            font-size: 35px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .winner_group_select {
+            font-size: 35px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .vote_li_inner_vote {
+            font-size: 35px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .identity_confirm_button_con {
+            display: none;
+            margin: 60px 0;
+        }
+
+        .identity_confirm_button {
+
+            padding: 20px 60px;
+            border: none;
+            background-color: deepskyblue;
+            color: white;
+            font-size: 35px;
+
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .vote_count_confirm_button {
+            padding: 20px 60px;
+            border: none;
+            background-color: deepskyblue;
+            color: white;
+            font-size: 35px;
+
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .game_start_btn_class {
+            padding: 20px 60px;
+            border: none;
+            background-color: deepskyblue;
+            color: white;
+            font-size: 35px;
+
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .vote_start_btn_class {
+            padding: 20px 60px;
+            border: none;
+            background-color: deepskyblue;
+            color: white;
+            font-size: 35px;
+
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .end_vote_btn_class {
+            padding: 20px 60px;
+            border: none;
+            background-color: deepskyblue;
+            color: white;
+            font-size: 35px;
+
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .end_game_btn_class {
+            padding: 20px 60px;
+            border: none;
+            background-color: deepskyblue;
+            color: white;
+            font-size: 35px;
+
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .identity_random_button {
+            padding: 20px 60px;
+            border: none;
+            background-color: mediumorchid;
+            color: white;
+            font-size: 35px;
+
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /*@media screen and (max-width: 600px) {*/
+        /*    body {*/
+        /*        background-color: lightgreen;*/
+        /*    }*/
+        /*}*/
+
+        .vote_ul {
+            display: flex;
+            flex-flow: row wrap;
+            width: 100%;
+        }
+
+        .vote_li {
+            display: flex;
+            flex-flow: row nowrap;
+            flex: none;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            width: 50%;
+            box-sizing: border-box;
+            padding: 0 50px;
+        }
+
+        .game_setting {
+            flex-flow: column nowrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        #vote_time_setting {
+            font-size: 35px;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .game_status_data {
+            font-size: 35px;
+            text-align: center;
+            margin-top: 50px;
+            color: coral;
+        }
+
+        .game_status_data > div {
+            margin: 30px 0;
+        }
+
+        .hide_player_ul {
+            width: 100vw;
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: flex-start;
+            align-items: center;
+            list-style: none;
+            margin: 50px 0;
+        }
+
+        .hide_player_inner_li {
+            width: 50%;
+            box-sizing: border-box;
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: space-evenly;
+            align-items: center;
+            font-size: 35px;
+            margin: 30px 0;
+        }
+
+        .hide_player_label {
+
+        }
+
+        .hide_player_checkbox {
+            width: 40px;
+            height: 40px;
+
+        }
+
+        .hide_top_hint {
+            font-size: 35px;
+            color: deepskyblue;
+            margin-top: 50px;
+            width: 100vw;
+            text-align: center;
+        }
+
+        #winner_score_setting_id {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .winner_dom_div {
+            width: 100vw;
+            margin: 50px 0;
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+        .winner_dom_div label {
+            margin-right: 20px;
+        }
+
+        .winner_dom_div input {
+            margin-left: 20px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            width: 100px;
+            font-size: 35px;
+            box-sizing: content-box;
+            padding: 10px;
+        }
+
+        .winner_score_confirm_btn {
+            font-size: 35px;
+            background-color: #8e94da;
+            padding: 20px 60px;
+            border-radius: 10px;
+            color: white;
+            margin: 50px 0;
+            border: none;
+        }
+
+        .join_game_con {
+            display: flex;
+            width: 600px;
+            flex-flow: column nowrap;
+            padding: 20px;
+            justify-content: space-evenly;
+            align-items: center;
+            border: 1px solid darkgray;
+            margin: 30px 0;
+            font-size: 35px;
+            color: darkgray;
+        }
+
+        .join_game_btn_wrapper {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: space-evenly;
+            align-items: center;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .join_game_id_inner_pass_btn {
+            background-color: limegreen;
+            padding: 20px 60px;
+            color: white;
+            font-size: 35px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .join_game_id_inner_refuse_btn {
+            background-color: orangered;
+            padding: 20px 60px;
+            color: white;
+            font-size: 35px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .random_identity_div_con {
+            width: 100%;
+            display: flex;
+            margin: 30px 0;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+        .group_random_div {
+            margin: 0 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #player_skill_list_con_id {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: space-evenly;
+            align-items: center;
+            font-size: 35px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            width: 80vw;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .player_skill_item {
+            margin: 20px auto;
+            word-break: break-all;
+            width: 100%;
+            text-align: center;
+        }
+
+        @media screen and (max-device-width: 1439px) {
+            .identity_li {
+                width: 100%;
+                display: flex;
+                flex-flow: row nowrap;
+                justify-content: space-between;
+                align-items: center;
+                flex: 1 0 auto;
+                margin: 30px 0;
+                padding: 0 30px;
+                box-sizing: border-box;
+            }
+
+            .vote_li {
+                display: flex;
+                flex-flow: row nowrap;
+                flex: none;
+                justify-content: space-between;
+                align-items: center;
+                margin: 30px 0;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+
+        }
+    </style>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+<div class="admin_con">
+    <div class="header">
+        <ul class="setting_item_con">
+            <li class="setting_item">创建游戏</li>
+            <li class="setting_item">身份设置</li>
+            <!--            <li class="setting_item">投票设置</li>-->
+            <li class="setting_item">隐藏玩家</li>
+            <li class="setting_item">胜分设置</li>
+            <li class="setting_item">游戏设置</li>
+            <li class="setting_item"><a href="/admin/sap" target="_blank"
+                                        style="text-decoration: none;color: inherit;width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;">后台管理</a>
+            </li>
+        </ul>
+    </div>
+    <div class="main_content">
+        <ul class="setting_content_con">
+            <li class="setting_content game_content">
+
+                <label for="player_count" style="margin: 30px 0;">玩家人数</label>
+                <div class="player_count_con">
+                    <div class="counter" onclick="player_reduce()">-</div>
+                    <input type="number" id="player_count" maxlength="3" value="16">
+                    <div class="counter" onclick="player_add()">+</div>
+                </div>
+
+                <button class="create_new_game" onclick="create_new_game(this)" id="create_new_game_id">新开一局游戏</button>
+
+
+            </li>
+            <li class="setting_content player_identity_setting">
+                <ul id="identity_confirm_id">
+                    <div style="width:100%;text-align:center;color: deepskyblue;margin-top: 50px;font-size: 35px;">
+                        请等待所有玩家加入游戏并选好座位号...
+                    </div>
+                </ul>
+                <div class="identity_confirm_button_con">
+                    <button type="button" class="identity_confirm_button" onclick="confirm_identity()"
+                            style="margin-right: 40px;">确定
+                    </button>
+                    <button type="button" class="identity_random_button" onclick="range_random_identity_new()"
+                            style="margin-left: 40px;">随机
+                    </button>
+                </div>
+
+            </li>
+            <!--            <li class="setting_content player_identity_setting">-->
+            <!--                <ul id="vote_confirm_id">-->
+            <!--                    <div style="width:100%;text-align:center;color: deepskyblue;margin-top: 50px;font-size: 35px;">-->
+            <!--                        请等待所有玩家加入游戏并选好座位号...-->
+            <!--                    </div>-->
+            <!--                </ul>-->
+            <!--                <div class="identity_confirm_button_con">-->
+            <!--                    <button type="button" class="vote_count_confirm_button" onclick="confirm_vote()">确定</button>-->
+            <!--                </div>-->
+
+            <!--            </li>-->
+            <li class="setting_content hide_player_setting" id="hide_player_setting_id"></li>
+            <li class="setting_content winner_score_setting" id="winner_score_setting_id"></li>
+            <li class="setting_content game_setting">
+                <div style="width:100%;text-align:center;margin-top: 50px;font-size: 35px;" id="game_start_id">
+                    <button class="game_start_btn_class" style="background-color: #8e94da;" onclick="game_start()">
+                        游戏开始
+                    </button>
+                </div>
+                <div style="width:100%;text-align:center;margin-top: 50px;font-size: 35px;" id="vote_start_id">
+                    <button class="vote_start_btn_class" style="background-color: #8e94da;" onclick="vote_start()">
+                        开始投票
+                    </button>
+                </div>
+                <div style="width:100%;text-align:center;margin-top: 50px;font-size: 35px;" id="vote_end_id">
+                    <button class="end_vote_btn_class" style="background-color: #8e94da;" onclick="vote_end()">
+                        结束投票
+                    </button>
+                </div>
+                <div style="width:100%;text-align:center;margin-top: 50px;font-size: 35px;"
+                     id="if_allow_use_skill_con_id">
+                    <button class="end_vote_btn_class" style="background-color: lightgreen;margin-right: 50px;"
+                            onclick="allow_use_skill()">
+                        允许发动技能
+                    </button>
+                    <button class="end_vote_btn_class" style="background-color: orangered;margin-left: 50px;"
+                            onclick="disallow_use_skill()">
+                        禁止发动技能
+                    </button>
+                </div>
+                <div style="width:100%;text-align:center;margin-top: 50px;font-size: 35px;" id="game_end_id">
+                    <button class="end_game_btn_class" style="background-color: orangered;" onclick="game_end()">
+                        结束游戏
+                    </button>
+                    <label for="game_winner_select" style="font-size: 35px;margin-right: 20px;">胜利阵营</label>
+                    <select name="" id="game_winner_select" class="winner_group_select" style="padding: 20px;">
+                        <option value="鹅" selected>鹅</option>
+                        <option value="鸭">鸭</option>
+
+                    </select>
+                </div>
+                <!--                <div style="width:100%;text-align:center;margin-top: 100px;font-size: 35px;" id="vote_time_setting_con">-->
+
+                <!--                </div>-->
+                <div class="game_status_data" id="game_status_data_id">
+                    <div><span>游戏状态：</span><span id="this_game_status"></span></div>
+                    <div><span>已投票轮数：</span><span id="voted_count"></span></div>
+                    <div><span>已投票人数：</span><span id="round_vote_count"></span><span id="all_alive_player_count"></span></div>
+                    <div><span>保镖绑定的玩家：</span><span id="baobiao_bundle"></span></div>
+                    <div><span>媒婆绑定的玩家：</span><span id="meipo_bundle"></span></div>
+                    <div><span>爆炸王绑定的玩家：</span><span id="baozhawang_bundle"></span></div>
+                    <div><span>已禁言玩家号码：</span><span id="bantalk_player_game_id"></span></div>
+                    <div><span>已监禁玩家号码：</span><span id="prisoner_player_game_id"></span></div>
+                    <div><span>鹅阵营任务分数：</span><span id="escore"></span></div>
+                    <div><span>未选座玩家：</span><span id="not_sel_no_player" style="white-space: pre;"></span></div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+<audio id="cikeAudio" preload="auto">
+    <source src="/static/audio/cike_voice.mp3" type="audio/mpeg">
+</audio>
+</body>
+<script>
+    const if_game_ready = '{$if_game_ready}';
+    const all_identity = JSON.parse('{$all_identity|raw}');
+    const all_player_info = JSON.parse('{$all_player_info|raw}');
+    var pc_inter_handle = null;
+    var game_info_data_handle = null;
+    var query_reviewed_handle = null;
+    var query_join_player_handle = null;
+    var query_player_skill_handle = null;
+    var if_all_player_ready = false;
+    var if_all_player_identity = false;
+    var identity_result = [];
+    var if_cike_voice_played = false;
+    //禁止双指放大缩小页面
+    document.documentElement.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    }, false);
+
+    //禁止双击放大缩小页面
+    var lastTouchEnd = 0;
+    document.documentElement.addEventListener('touchend', function (event) {
+        var now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+
+    function create_player_join_game_reviewed_dom(target_arr) {
+        var wrapper = null;
+        if (document.getElementById('join_game_con_wrapper_id') == null) {
+            wrapper = document.createElement('div');
+            wrapper.id = 'join_game_con_wrapper_id';
+            $('.game_content').append(wrapper);
+        } else {
+            wrapper = document.getElementById('join_game_con_wrapper_id');
+        }
+        for (let i = 0; i < target_arr.length; i++) {
+            if (document.getElementById('join_game_id' + target_arr[i].userid) == null) {
+                const dom = document.createElement('div');
+                const hint = document.createElement('p');
+                const pass_button = document.createElement('button');
+                const refuse_button = document.createElement('button');
+                const btn_wrapper = document.createElement('div');
+
+                hint.innerHTML = '用户：' + target_arr[i].username + '申请加入游戏';
+                hint.className = 'join_game_id_inner_hint';
+
+                pass_button.type = 'button';
+                pass_button.innerHTML = '通过';
+                pass_button.className = 'join_game_id_inner_pass_btn';
+                pass_button.addEventListener('click', function () {
+                    if (confirm('确定允许该用户加入游戏?')) {
+                        $.ajax({
+                            url: '/admin/passPlayerJoinGame',
+                            type: 'post',
+                            data: {
+                                'user_id': target_arr[i].userid,
+                                'user_name': target_arr[i].username
+                            },
+                            success: function (d, s, x) {
+                                if (s === 'success') {
+                                    if (d === 'suc') {
+                                        // alert('通过成功，该用户已加入游戏！');
+                                        $('#' + 'join_game_id' + target_arr[i].userid).remove();
+                                    } else if (d === 'player_full') {
+                                        alert('操作失败，游戏人数已满！');
+                                        $('#' + 'join_game_id' + target_arr[i].userid).remove();
+                                    } else if (d === 'game_not_in_wait') {
+                                        alert('操作失败，游戏正在进行或已结束');
+                                    }
+                                }
+                            },
+                            error: function (e) {
+                                alert('网络错误:', e);
+                            }
+                        })
+                    }
+
+                });
+
+                refuse_button.type = 'button';
+                refuse_button.innerHTML = '拒绝';
+                refuse_button.className = 'join_game_id_inner_refuse_btn';
+                refuse_button.addEventListener('click', function () {
+                    if (confirm('确定拒绝该用户加入游戏？')) {
+                        $.ajax({
+                            url: '/admin/refusePlayerJoinGame',
+                            type: 'post',
+                            data: {
+                                'user_id': target_arr[i].userid
+                            },
+                            success: function (d, s, x) {
+                                if (s === 'success') {
+                                    if (d === 'suc') {
+                                        // alert('已拒绝该用户加入游戏！');
+                                        $('#' + 'join_game_id' + target_arr[i].userid).remove();
+                                    } else if (d === 'game_not_in_wait') {
+                                        alert('操作失败，游戏正在进行或已结束');
+                                    }
+                                }
+                            },
+                            error: function (e) {
+                                alert('网络错误:', e);
+                            }
+                        })
+                    }
+                });
+
+                btn_wrapper.appendChild(pass_button);
+                btn_wrapper.appendChild(refuse_button);
+                btn_wrapper.className = 'join_game_btn_wrapper';
+
+                dom.className = 'join_game_con';
+                dom.id = 'join_game_id' + target_arr[i].userid;
+                dom.appendChild(hint);
+                dom.appendChild(btn_wrapper);
+
+                $(wrapper).append(dom);
+            }
+        }
+    }
+
+
+    function clear_join_game_reviewed_dom() {
+        if (document.getElementById('join_game_con_wrapper_id') != null) {
+            $('#join_game_con_wrapper_id').empty();
+        }
+    }
+
+    function query_reviewed() {
+        $.ajax({
+            url: '/admin/queryReviewedData',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    if (d === 'game_not_in_wait') {
+                        clearInterval(query_reviewed_handle);
+                    } else {
+                        create_player_join_game_reviewed_dom(d);
+                    }
+                }
+            },
+            error: function (e) {
+                alert('网络错误:', e);
+            }
+        })
+    }
+
+
+    //返回true表示没有空选项,返回false表示有空选项
+    function detect_all_identity() {
+        let if_exist_null_option = false;
+        $('.identity_li_inner_identity').each(function () {
+            if ($(this).val() === '' || $(this).val() === null) {
+                if_exist_null_option = true;
+                return false;
+            }
+        });
+        return !if_exist_null_option;
+        // if (identity_result.length === 0) {
+        //     return false;
+        // } else {
+        //     for (let i = 0; i < identity_result.length; i++) {
+        //         if (identity_result[i][1] === '' || identity_result[i][1] === null || identity_result[i][2] === '' || identity_result[i][2] === null) {
+        //             return false;
+        //         }
+        //     }
+        //     return true;
+        // }
+    }
+
+
+    function create_hide_player_dom(target_arr) {
+        if (target_arr === 'at_wait') {
+            const hint = document.createElement('div');
+            hint.className = 'hide_top_hint';
+            hint.innerHTML = '游戏正在等待所有玩家就绪...';
+            $('#hide_player_setting_id').empty().append(hint);
+        } else if (target_arr === 'have_end') {
+            const hint = document.createElement('div');
+            hint.className = 'hide_top_hint';
+            hint.innerHTML = '游戏已结束';
+            $('#hide_player_setting_id').empty().append(hint);
+        } else {
+            const ul = document.createElement('ul');
+            ul.className = 'hide_player_ul';
+            console.log(target_arr);
+
+            target_arr.sort((a, b) => {
+                if (a.game_id < b.game_id) {
+                    return -1;
+                }
+                if (a.game_id > b.game_id) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            for (let i = 0; i < target_arr.length; i++) {
+                const li = document.createElement('li');
+                const input_ckx = document.createElement('input');
+                const label = document.createElement('label');
+
+                // label.setAttribute('for', 'hide_player_ckb' + target_arr[i].game_id);
+                label.className = 'hide_player_label';
+                label.innerHTML = target_arr[i].game_id + '号玩家';
+                input_ckx.className = 'hide_player_checkbox';
+                input_ckx.id = 'hide_player_ckb' + target_arr[i].game_id;
+                input_ckx.type = 'checkbox';
+                input_ckx.checked = target_arr[i].status === 'out';
+                // input_ckx.disabled = target_arr[i].status === 'out';
+                input_ckx.addEventListener('click', function (e) {
+                    const text = $(this).prop('checked') ? '确定让' + target_arr[i].game_id + '号玩家出局？' : '确定让' + target_arr[i].game_id + '号玩家复活？';
+                    const that = this;
+                    if (confirm(text)) {
+                        $.ajax({
+                            url: '/admin/hidePlayer',
+                            type: 'post',
+                            data: {
+                                game_id: target_arr[i].game_id
+                            },
+                            success: function (d, s, x) {
+                                if (s == 'success') {
+                                    if (d === 'suc') {
+                                        // $('#hide_player_ckb' + target_arr[i].game_id).prop({
+                                        //     checked: !that.checked
+                                        // });
+                                        const result_text = that.checked ? target_arr[i].game_id + '号玩家已出局' : target_arr[i].game_id + '号玩家已复活';
+                                        alert(result_text);
+                                    } else if (d === 'have_out') {
+                                        alert('您投票的玩家已出局');
+                                    } else if (d === 'target_player_not_exist') {
+                                        alert('您投票的玩家不存在');
+                                    }
+                                }
+                            },
+                            error: function (e) {
+                                console.log('网络错误:', e);
+                            }
+                        })
+                    } else {
+                        e.preventDefault();
+                    }
+                });
+                li.className = 'hide_player_inner_li';
+
+                li.appendChild(label);
+                li.appendChild(input_ckx);
+                ul.appendChild(li);
+            }
+            $('#hide_player_setting_id').empty().append(ul);
+        }
+    }
+
+    function query_all_player_status_and_create() {
+        $.ajax({
+            url: '/admin/getAllPlayerInfo',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    create_hide_player_dom(d);
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    if (if_game_ready == 'true') {
+        create_player_join_dom();
+        pc_inter_handle = setInterval(query_player_count, 1000);
+    }
+
+
+    function create_winner_score_dom(e_score, ya_score, zl_score, mn_task_score) {
+        const e_dom = document.createElement('div');
+        const ya_dom = document.createElement('div');
+        const zhongli_dom = document.createElement('div');
+        const mn_task_dom = document.createElement('div');
+        const e_label = document.createElement('label');
+        const ya_label = document.createElement('label');
+        const zhongli_label = document.createElement('label');
+        const mn_task_label = document.createElement('label');
+        const e_input = document.createElement('input');
+        const ya_input = document.createElement('input');
+        const zhongli_input = document.createElement('input');
+        const mn_task_input = document.createElement('input');
+        const button = document.createElement('button');
+
+        e_label.innerHTML = '鹅阵营获胜分数：';
+        ya_label.innerHTML = '鸭阵营获胜分数：';
+        zhongli_label.innerHTML = '中立阵营获胜分数：';
+        mn_task_label.innerHTML = '鹅阵营迷你任务获胜所需分数：';
+        button.innerHTML = '确定';
+        button.className = 'winner_score_confirm_btn';
+        button.addEventListener('click', function () {
+            $.ajax({
+                url: '/admin/updateWinnerScore',
+                type: 'post',
+                data: {
+                    es: e_input.value,
+                    ys: ya_input.value,
+                    zs: zhongli_input.value,
+                    mn_task: mn_task_input.value
+                },
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d === 'suc') {
+                            alert('更新成功');
+                        } else {
+                            alert('更新失败,错误信息：' + d);
+                        }
+                    }
+                },
+                error: function (e) {
+                    alert('网络错误:' + e)
+                }
+            })
+        })
+        e_input.type = 'number';
+        ya_input.type = 'number';
+        zhongli_input.type = 'number';
+        mn_task_input.type = 'number';
+        e_input.value = Number(e_score);
+        ya_input.value = Number(ya_score);
+        zhongli_input.value = Number(zl_score);
+        mn_task_input.value = Number(mn_task_score);
+        e_dom.className = 'winner_dom_div';
+        ya_dom.className = 'winner_dom_div'
+        zhongli_dom.className = 'winner_dom_div';
+        mn_task_dom.className = 'winner_dom_div';
+        e_dom.appendChild(e_label);
+        e_dom.appendChild(e_input);
+        ya_dom.appendChild(ya_label);
+        ya_dom.appendChild(ya_input);
+        zhongli_dom.appendChild(zhongli_label);
+        zhongli_dom.appendChild(zhongli_input);
+        mn_task_dom.appendChild(mn_task_label);
+        mn_task_dom.appendChild(mn_task_input);
+
+        $('#winner_score_setting_id').empty().append(e_dom).append(ya_dom).append(zhongli_dom).append(mn_task_dom).append(button);
+    }
+
+    function query_winner_score() {
+        $.ajax({
+            url: '/admin/queryWinnerScore',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    create_winner_score_dom(d.es, d.ys, d.zs, d.mn_task);
+                }
+            },
+            error: function (e) {
+                alert('网络错误:' + e)
+            }
+        })
+    }
+
+
+    function setting_item_callback(setting_item) {
+        if (setting_item === '隐藏玩家') {
+            query_all_player_status_and_create();
+        } else if (setting_item === '胜分设置') {
+            query_winner_score();
+        }
+    }
+
+    $('.setting_item').on('click', function () {
+        const i = $(this).index();
+        const t_dom = $('.setting_content').get(i);
+        $('.setting_item').css({
+            'background-color': 'white',
+            'color': 'black'
+        });
+        $(this).css({
+            'background-color': 'deepskyblue',
+            'color': 'white'
+        });
+        $('.setting_content').css({
+            'display': 'none'
+        });
+        $(t_dom).css({
+            'display': 'flex'
+        });
+        setting_item_callback(this.innerHTML);
+    })
+
+    function player_reduce() {
+        $('#player_count').val(Number($('#player_count').val()) - 1);
+    }
+
+    function player_add() {
+        $('#player_count').val(Number($('#player_count').val()) + 1);
+    }
+
+
+    function create_new_game(t) {
+        const psw = prompt('请设置房间密码');
+        if (psw) {
+            $.ajax({
+                url: '/admin/createNewGame',
+                type: 'post',
+                data: {
+                    player_count: $('#player_count').val(),
+                    join_psw: psw
+                },
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d.stat === 'suc') {
+                            new_game_init_dom();
+                            create_player_join_dom();
+                            pc_inter_handle = setInterval(query_player_count, 1000);
+                            alert('创建成功');
+                        } else if (d == 'exist_gaming') {
+                            alert('本局游戏还未结束,请先结束本局游戏！');
+                        } else {
+                            alert('创建失败,错误信息:' + d);
+                        }
+                    }
+                },
+                error: function (e) {
+                    alert('网络错误:', e);
+                }
+            })
+        } else {
+            alert("房间密码取消输入");
+        }
+
+    }
+
+    function query_player_count() {
+        $.ajax({
+            url: '/admin/queryPlayerCount',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    $('#join_player_count').html(d.player_count);
+                    if (d.if_all_ready == 'true') {
+                        clearInterval(pc_inter_handle);
+                        if_all_player_ready = true;
+                        create_identity_dom(d.player_info);
+                        // create_vote_dom(d.player_info);
+                        enable_identity_select();
+                    }
+                }
+            },
+            error: function (e) {
+                alert('网络错误:', e);
+            }
+        })
+    }
+
+    function create_player_join_dom() {
+        $.ajax({
+            url: '/admin/queryJoinGameData',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    if (document.getElementById('player_wait_stat_dom_id') != null) {
+                        $('#join_player_count').html('0');
+                        $('#all_player_id').html('/' + d);
+                    } else {
+                        const dom = document.createElement('div');
+                        dom.id = 'player_wait_stat_dom_id';
+                        const hint_span = document.createElement('span');
+                        const join_count = document.createElement('span');
+                        const all_count = document.createElement('span');
+
+                        dom.style.color = 'deepskyblue';
+                        dom.style.marginTop = '30px';
+                        dom.style.fontSize = '35px';
+
+                        hint_span.innerHTML = '参与人数：';
+                        join_count.id = 'join_player_count';
+                        join_count.innerHTML = '0';
+                        all_count.id = 'all_player_id';
+                        all_count.innerHTML = '/' + d;
+
+                        dom.appendChild(hint_span);
+                        dom.appendChild(join_count);
+                        dom.appendChild(all_count);
+
+                        $('.game_content').append(dom);
+                    }
+                    // query_reviewed_handle = setInterval(query_reviewed, 1000);
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+
+    }
+
+
+    function init_identity_option(group, target_select_dom, sel_id) {
+        $(target_select_dom).empty();
+        switch (group) {
+            case '鹅': {
+                const option_null = document.createElement('option');
+                target_select_dom.appendChild(option_null);
+                for (let i = 0; i < all_identity['鹅'].length; i++) {
+                    const option = document.createElement('option');
+                    option.value = all_identity['鹅'][i];
+                    option.innerHTML = all_identity['鹅'][i];
+                    if (sel_id !== undefined && sel_id === option.value) {
+                        option.selected = true;
+                    }
+                    target_select_dom.appendChild(option);
+                }
+                break;
+            }
+            case '鸭': {
+                const option_null = document.createElement('option');
+                target_select_dom.appendChild(option_null);
+                for (let i = 0; i < all_identity['鸭'].length; i++) {
+                    const option = document.createElement('option');
+                    option.value = all_identity['鸭'][i];
+                    // option.style.color = 'red';
+                    option.innerHTML = all_identity['鸭'][i];
+                    if (sel_id !== undefined && sel_id === option.value) {
+                        option.selected = true;
+                    }
+                    target_select_dom.appendChild(option);
+                }
+                break;
+            }
+            case '中立': {
+                const option_null = document.createElement('option');
+                target_select_dom.appendChild(option_null);
+                for (let i = 0; i < all_identity['中立'].length; i++) {
+                    const option = document.createElement('option');
+                    option.value = all_identity['中立'][i];
+                    option.innerHTML = all_identity['中立'][i];
+                    if (sel_id !== undefined && sel_id === option.value) {
+                        option.selected = true;
+                    }
+                    target_select_dom.appendChild(option);
+                }
+                break;
+            }
+            default: {
+
+            }
+        }
+    }
+
+    function new_game_init_dom() {
+        $('#identity_confirm_id').empty().append('<div style="width:100%;text-align:center;color: deepskyblue;margin-top: 50px;font-size: 35px;">\n' +
+            '请等待所有玩家加入游戏并选好座位号...\n' +
+            '</div>');
+        $('#vote_confirm_id').empty().append('<div style="width:100%;text-align:center;color: deepskyblue;margin-top: 50px;font-size: 35px;">\n' +
+            '请等待所有玩家加入游戏并选好座位号...\n' +
+            '</div>');
+        $('.identity_confirm_button_con').css('display', 'none');
+        $('#this_game_status').html('');
+        $('#voted_count').html('');
+        $('#round_vote_count').html('');
+        // $('#out_player_count').html('');
+        $('#all_alive_player_count').html('');
+        // $('#number_ready_player_count').html('');
+        $('#baobiao_bundle').html('');
+        $('#meipo_bundle').html('');
+        $('#baozhawang_bundle').html('');
+        clear_join_game_reviewed_dom();
+    }
+
+    function create_identity_dom(ajax_data) {
+        if ($('#identity_confirm_id').children('.identity_li').length > 0) {
+            return;
+        }
+
+        $('#identity_confirm_id').empty();
+
+        let target_info = null;
+        if (ajax_data.length !== all_player_info.length) {
+            target_info = ajax_data;
+        } else {
+            target_info = all_player_info;
+        }
+        for (let i = 0; i < target_info.length; i++) {
+            const li_dom = document.createElement('li');
+
+            li_dom.className = 'identity_li';
+
+            const div_number = document.createElement('div');
+            const select_dom_group = document.createElement('select');
+            const item_group_null = document.createElement('option');
+            const item_group1 = document.createElement('option');
+            const item_group2 = document.createElement('option');
+            const item_group3 = document.createElement('option');
+
+            select_dom_group.setAttribute('number', i + 1);
+            div_number.innerHTML = (i + 1) + '号玩家';
+            div_number.className = 'identity_number';
+
+            const target_player_item = target_info.filter(v => Number(v.game_id) === Number(i + 1))[0];
+
+            item_group_null.value = '';
+            item_group1.value = '鹅';
+            item_group1.innerHTML = '鹅';
+            if (target_player_item['group'] === item_group1.value) {
+                item_group1.selected = true;
+            }
+            item_group2.value = '鸭';
+            item_group2.innerHTML = '鸭';
+            if (target_player_item['group'] === item_group2.value) {
+                item_group2.selected = true;
+            }
+            item_group3.value = '中立';
+            item_group3.innerHTML = '中立';
+            if (target_player_item['group'] === item_group3.value) {
+                item_group3.selected = true;
+            }
+            select_dom_group.appendChild(item_group_null);
+            select_dom_group.appendChild(item_group1);
+            select_dom_group.appendChild(item_group2);
+            select_dom_group.appendChild(item_group3);
+
+            select_dom_group.addEventListener('change', function () {
+                init_identity_option(this.value, $(this).next().get(0));
+                if (this.value === '鸭') {
+                    $(this).next('.identity_li_inner_identity').css('color', 'red');
+                } else {
+                    $(this).next('.identity_li_inner_identity').css('color', 'black');
+                }
+            });
+
+            select_dom_group.className = 'identity_li_inner_group'
+
+            const select_dom_identity = document.createElement('select');
+
+            init_identity_option(target_player_item['group'], select_dom_identity, target_player_item['identity']);
+
+            select_dom_identity.setAttribute('number', i + 1);
+
+            select_dom_identity.className = 'identity_li_inner_identity';
+
+            if (target_player_item['group'] === '鸭') {
+                select_dom_identity.style.color = 'red';
+            } else {
+                select_dom_identity.style.color = 'black';
+            }
+
+            select_dom_identity.setAttribute('current_value', target_player_item['identity']);
+            select_dom_identity.addEventListener('change', function () {
+                const that_iden = this;
+
+                $('.identity_li_inner_identity').each(function () {
+                    // console.log('this:that,',this!==that_iden);
+                    if ($(this).val() === $(that_iden).val() && this !== that_iden && $(that_iden).val() !== '' && $(that_iden).attr('current_value') !== '') {
+                        console.log('trigger');
+                        for (let j = 0; j < this.options.length; j++) {
+                            if (this.options[j].value === $(that_iden).attr('current_value')) {
+                                // 如果找到匹配的选项，选中它
+                                this.options[j].selected = true;
+                                break;
+                            }
+                        }
+
+                        return false;
+                    }
+                })
+                // console.log('cv:', $(that_iden).val(), 'type_of:', typeof $(that_iden).val());
+                $(that_iden).attr('current_value', that_iden.value);
+            });
+
+            li_dom.appendChild(div_number);
+            li_dom.appendChild(select_dom_group);
+            li_dom.appendChild(select_dom_identity);
+
+            $('#identity_confirm_id').append(li_dom);
+        }
+
+        const random_con = document.createElement('div');
+        const ya_random = document.createElement('div');
+        const zhongli_random = document.createElement('div');
+        const ya_label = document.createElement('label');
+        const zhongli_label = document.createElement('label');
+        const ya_input = document.createElement('input');
+        const zhongli_input = document.createElement('input');
+
+        ya_label.innerHTML = '鸭阵营数量：';
+        ya_label.style.fontSize = '35px';
+        zhongli_label.innerHTML = '中立阵营数量：';
+        zhongli_label.style.fontSize = '35px';
+
+        ya_input.type = 'number';
+        ya_input.style.width = '100px';
+        ya_input.style.height = '35px';
+        ya_input.style.border = '1px solid darkgray';
+        ya_input.style.padding = '10px 20px';
+        ya_input.style.borderRadius = '10px';
+        ya_input.id = 'random_ya_count';
+
+        zhongli_input.type = 'number';
+        zhongli_input.style.width = '100px';
+        zhongli_input.style.height = '35px';
+        zhongli_input.style.border = '1px solid darkgray';
+        zhongli_input.style.padding = '10px 20px';
+        zhongli_input.style.borderRadius = '10px';
+        zhongli_input.id = 'random_zhongli_count';
+
+        ya_input.style.fontSize = '35px';
+        zhongli_input.style.fontSize = '35px';
+
+        ya_random.appendChild(ya_label);
+        ya_random.appendChild(ya_input);
+        zhongli_random.appendChild(zhongli_label);
+        zhongli_random.appendChild(zhongli_input);
+
+        random_con.appendChild(ya_random);
+        random_con.appendChild(zhongli_random);
+        ya_random.className = 'group_random_div';
+        zhongli_random.className = 'group_random_div';
+        random_con.className = 'random_identity_div_con';
+        $('#identity_confirm_id').prepend(random_con);
+    }
+
+    function update_identity_dom() {
+        $('#identity_confirm_id').empty();
+
+        for (let i = 0; i < identity_result.length; i++) {
+            const li_dom = document.createElement('li');
+
+            li_dom.className = 'identity_li';
+
+            const div_number = document.createElement('div');
+            const select_dom_group = document.createElement('select');
+            const item_group_null = document.createElement('option');
+            const item_group1 = document.createElement('option');
+            const item_group2 = document.createElement('option');
+            const item_group3 = document.createElement('option');
+
+            select_dom_group.setAttribute('number', i + 1);
+            div_number.innerHTML = (i + 1) + '号玩家';
+            div_number.className = 'identity_number';
+
+            item_group_null.value = '';
+            item_group1.value = '鹅';
+            item_group1.innerHTML = '鹅';
+            if (identity_result[i][1] === item_group1.value) {
+                item_group1.selected = true;
+            }
+            item_group2.value = '鸭';
+            item_group2.innerHTML = '鸭';
+            if (identity_result[i][1] === item_group2.value) {
+                item_group2.selected = true;
+            }
+            item_group3.value = '中立';
+            item_group3.innerHTML = '中立';
+            if (identity_result[i][1] === item_group3.value) {
+                item_group3.selected = true;
+            }
+            select_dom_group.appendChild(item_group_null);
+            select_dom_group.appendChild(item_group1);
+            select_dom_group.appendChild(item_group2);
+            select_dom_group.appendChild(item_group3);
+
+            select_dom_group.addEventListener('change', function () {
+                init_identity_option(this.value, $(this).next().get(0));
+                if (this.value === '鸭') {
+                    $(this).next('.identity_li_inner_identity').css('color', 'red');
+                } else {
+                    $(this).next('.identity_li_inner_identity').css('color', 'black');
+                }
+            });
+
+            select_dom_group.className = 'identity_li_inner_group'
+
+            const select_dom_identity = document.createElement('select');
+
+            init_identity_option(identity_result[i][1], select_dom_identity, identity_result[i][2]);
+
+            if (identity_result[i][1] === '鸭') {
+                select_dom_identity.style.color = 'red';
+            } else {
+                select_dom_identity.style.color = 'black';
+            }
+
+            select_dom_identity.setAttribute('number', i + 1);
+
+            select_dom_identity.className = 'identity_li_inner_identity';
+
+            select_dom_identity.setAttribute('current_value', identity_result[i][2]);
+            select_dom_identity.addEventListener('change', function () {
+                const that_iden = this;
+
+                $('.identity_li_inner_identity').each(function () {
+                    // console.log('this:that,',this!==that_iden);
+                    if ($(this).val() === $(that_iden).val() && this !== that_iden && $(that_iden).val() !== '' && $(that_iden).attr('current_value') !== '') {
+                        console.log('trigger');
+                        for (let j = 0; j < this.options.length; j++) {
+                            if (this.options[j].value === $(that_iden).attr('current_value')) {
+                                // 如果找到匹配的选项，选中它
+                                this.options[j].selected = true;
+                                break;
+                            }
+                        }
+
+                        return false;
+                    }
+                })
+                // console.log('cv:', $(that_iden).val(), 'type_of:', typeof $(that_iden).val());
+                $(that_iden).attr('current_value', that_iden.value);
+            });
+
+            li_dom.appendChild(div_number);
+            li_dom.appendChild(select_dom_group);
+            li_dom.appendChild(select_dom_identity);
+
+            $('#identity_confirm_id').append(li_dom);
+        }
+
+        const random_con = document.createElement('div');
+        const ya_random = document.createElement('div');
+        const zhongli_random = document.createElement('div');
+        const ya_label = document.createElement('label');
+        const zhongli_label = document.createElement('label');
+        const ya_input = document.createElement('input');
+        const zhongli_input = document.createElement('input');
+
+        ya_label.innerHTML = '鸭阵营数量：';
+        ya_label.style.fontSize = '35px';
+        zhongli_label.innerHTML = '中立阵营数量：';
+        zhongli_label.style.fontSize = '35px';
+
+        ya_input.type = 'number';
+        ya_input.style.width = '100px';
+        ya_input.style.height = '35px';
+        ya_input.style.border = '1px solid darkgray';
+        ya_input.style.padding = '10px 20px';
+        ya_input.style.borderRadius = '10px';
+        ya_input.id = 'random_ya_count';
+
+        zhongli_input.type = 'number';
+        zhongli_input.style.width = '100px';
+        zhongli_input.style.height = '35px';
+        zhongli_input.style.border = '1px solid darkgray';
+        zhongli_input.style.padding = '10px 20px';
+        zhongli_input.style.borderRadius = '10px';
+        zhongli_input.id = 'random_zhongli_count';
+
+        ya_input.style.fontSize = '35px';
+        zhongli_input.style.fontSize = '35px';
+
+        ya_random.appendChild(ya_label);
+        ya_random.appendChild(ya_input);
+        zhongli_random.appendChild(zhongli_label);
+        zhongli_random.appendChild(zhongli_input);
+
+        random_con.appendChild(ya_random);
+        random_con.appendChild(zhongli_random);
+        ya_random.className = 'group_random_div';
+        zhongli_random.className = 'group_random_div';
+        random_con.className = 'random_identity_div_con';
+        $('#identity_confirm_id').prepend(random_con);
+    }
+
+    function create_random_identity(identity_data_arr) {
+        for (let i = 0; i < identity_data_arr.length; i++) {
+            const item = identity_data_arr[i];
+            if (item[1] === '' && item[2] === null) {
+                const ran_dig = Math.floor(Math.random() * 3);
+                switch (ran_dig) {
+                    case 0: {
+                        const range = all_identity['鹅'];
+                        const ran_iden = Math.floor(Math.random() * range.length);
+                        identity_data_arr[i][1] = '鹅';
+                        identity_data_arr[i][2] = all_identity['鹅'][ran_iden];
+                        break;
+                    }
+                    case 1: {
+                        const range = all_identity['鸭'];
+                        const ran_iden = Math.floor(Math.random() * range.length);
+                        identity_data_arr[i][1] = '鸭';
+                        identity_data_arr[i][2] = all_identity['鸭'][ran_iden];
+                        break;
+                    }
+                    case 2: {
+                        const range = all_identity['中立'];
+                        const ran_iden = Math.floor(Math.random() * range.length);
+                        identity_data_arr[i][1] = '中立';
+                        identity_data_arr[i][2] = all_identity['中立'][ran_iden];
+                        break;
+                    }
+                }
+            } else if (item[1] !== '' && item[2] === '') {
+                switch (item[1]) {
+                    case '鹅': {
+                        const range = all_identity['鹅'];
+                        const ran_iden = Math.floor(Math.random() * range.length);
+                        identity_data_arr[i][2] = all_identity['鹅'][ran_iden];
+                        break;
+                    }
+                    case '鸭': {
+                        const range = all_identity['鸭'];
+                        const ran_iden = Math.floor(Math.random() * range.length);
+                        identity_data_arr[i][2] = all_identity['鸭'][ran_iden];
+                        break;
+                    }
+                    case '中立': {
+                        const range = all_identity['中立'];
+                        const ran_iden = Math.floor(Math.random() * range.length);
+                        identity_data_arr[i][2] = all_identity['中立'][ran_iden];
+                        break;
+                    }
+                }
+            }
+        }
+        return identity_data_arr;
+    }
+
+    function range_random_identity_new() {
+        var ya_count = $('#random_ya_count').val();
+        var zhongli_count = $('#random_zhongli_count').val();
+        if (ya_count === '' || zhongli_count === '') {
+            alert('请输入鸭和中立阵营的玩家数量');
+        } else {
+            ya_count = Number(ya_count);
+            zhongli_count = Number(zhongli_count);
+            const tmp_id_result = [];
+            const player_count = $('.identity_li_inner_identity').length;
+
+            if (ya_count + zhongli_count > player_count) {
+                alert('鸭和中立阵营的玩家数量超过总玩家数量');
+                return;
+            }
+
+            const e_group_count = player_count - ya_count - zhongli_count;
+            const range_ya_identity = JSON.parse(JSON.stringify(all_identity['鸭']));
+            const range_zhongli_identity = JSON.parse(JSON.stringify(all_identity['中立']));
+            const range_e_identity = JSON.parse(JSON.stringify(all_identity['鹅']));
+            const game_id_arr = [];
+
+            for (let i = 0; i < player_count; i++) {
+                game_id_arr.push(i + 1);
+            }
+
+            for (let i = 0; i < ya_count; i++) {
+                let ya_index = null;
+                if (i === 0) {
+                    ya_index = range_ya_identity.findIndex(v => v === '刺客');
+                } else {
+                    ya_index = Math.floor(Math.random() * range_ya_identity.length);
+                }
+
+                const game_id_index = Math.floor(Math.random() * game_id_arr.length);
+                const ya_group = '鸭';
+                const tmp = [];
+                tmp.push(game_id_arr[game_id_index]);
+                game_id_arr.splice(game_id_index, 1);
+                tmp.push('鸭');
+                tmp.push(range_ya_identity[ya_index]);
+                range_ya_identity.splice(ya_index, 1);
+                tmp_id_result.push(tmp);
+            }
+            for (let i = 0; i < zhongli_count; i++) {
+                let zhongli_index = null;
+                if (i === 0) {
+                    zhongli_index = range_zhongli_identity.findIndex(v => v === '乌鸦');
+                } else {
+                    zhongli_index = Math.floor(Math.random() * range_zhongli_identity.length);
+                }
+
+                const game_id_index = Math.floor(Math.random() * game_id_arr.length);
+                const ya_group = '中立';
+                const tmp = [];
+                tmp.push(game_id_arr[game_id_index]);
+                game_id_arr.splice(game_id_index, 1);
+                tmp.push('中立');
+                tmp.push(range_zhongli_identity[zhongli_index]);
+                range_zhongli_identity.splice(zhongli_index, 1);
+                tmp_id_result.push(tmp);
+            }
+            for (let i = 0; i < e_group_count; i++) {
+                let e_index = null;
+                if (i === 0) {
+                    e_index = range_e_identity.findIndex(v => v === '警长');
+                } else if (i === 1) {
+                    e_index = range_e_identity.findIndex(v => v === '正义使者');
+                } else if (i === 2) {
+                    e_index = range_e_identity.findIndex(v => v === '加拿大鹅');
+                } else if (i === 3) {
+                    e_index = range_e_identity.findIndex(v => v === '侦探');
+                } else if (i === 4) {
+                    e_index = range_e_identity.findIndex(v => v === '观鸟者');
+                } else {
+                    e_index = Math.floor(Math.random() * range_e_identity.length);
+                }
+
+                const game_id_index = Math.floor(Math.random() * game_id_arr.length);
+                const ya_group = '鹅';
+                const tmp = [];
+                tmp.push(game_id_arr[game_id_index]);
+                game_id_arr.splice(game_id_index, 1);
+                tmp.push('鹅');
+                tmp.push(range_e_identity[e_index]);
+                range_e_identity.splice(e_index, 1);
+                tmp_id_result.push(tmp);
+            }
+            identity_result = [];
+            for (let i = 0; i < tmp_id_result.length; i++) {
+                for (let j = 0; j < tmp_id_result.length; j++) {
+                    if (tmp_id_result[j][0] === (i + 1)) {
+                        identity_result.push(tmp_id_result[j]);
+                        break;
+                    }
+                }
+            }
+            update_identity_dom();
+        }
+    }
+
+
+    function random_identity() {
+        identity_result = [];
+        $('.identity_li_inner_group').each(function (i, e) {
+            const item = [];
+            item.push($(this).attr('number'));
+            item.push($(this).val());
+            identity_result.push(item);
+        });
+
+        $('.identity_li_inner_identity').each(function (i, e) {
+            identity_result[i].push($(this).val());
+        });
+
+        identity_result = create_random_identity(identity_result);
+        update_identity_dom();
+    }
+
+    function disabled_identity_select() {
+        $('.identity_li_inner_group').prop('disabled', 'true');
+        $('.identity_li_inner_identity').prop('disabled', 'true');
+        $('.identity_confirm_button').prop('disabled', 'true');
+        $('.identity_random_button').prop('disabled', 'true');
+    }
+
+    function enable_identity_select() {
+        $('.identity_confirm_button_con').css('display', 'block');
+        $('.identity_li_inner_group').prop('disabled', false);
+        $('.identity_li_inner_identity').prop('disabled', false);
+        $('.identity_confirm_button').prop('disabled', false);
+        $('.identity_random_button').prop('disabled', false);
+    }
+
+    function update_identity_result() {
+        const tmp_arr = [];
+        $('.identity_li_inner_group').each(function (i, e) {
+            const tmp = [];
+            tmp.push($(this).attr('number'));
+            tmp.push($(this).val());
+            tmp.push($(this).next('.identity_li_inner_identity').val());
+            tmp_arr.push(tmp);
+        });
+        identity_result = tmp_arr;
+    }
+
+    function confirm_identity() {
+        if (detect_all_identity()) {
+            update_identity_result();
+            $.ajax({
+                url: '/admin/confirmIdentity',
+                type: 'post',
+                data: {
+                    result: JSON.stringify(identity_result)
+                },
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d === 'suc') {
+                            disabled_identity_select();
+                            alert('设置成功');
+                        } else if (d === 'fail') {
+                            alert('身份无改变');
+                        } else if (d === 'gaming') {
+                            alert('已经在游戏中,设置失败');
+                        } else if (d === 'game_end') {
+                            alert('游戏已结束,设置失败！');
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        } else {
+            alert('还有未确定的玩家身份！')
+        }
+        // console.log('id:', id_result);
+
+    }
+
+    // function create_vote_dom(player_info) {
+    //     let target_data = player_info;
+    //     // if (player_info.length !== all_player_info.length) {
+    //     //     target_data = player_info;
+    //     // } else {
+    //     //     target_data = all_player_info;
+    //     // }
+    //
+    //     $('#vote_confirm_id').empty();
+    //     const ul_dom = document.getElementById('vote_confirm_id');
+    //     ul_dom.className = 'vote_ul';
+    //     for (let i = 0; i < target_data.length; i++) {
+    //         const vote_li = document.createElement('li')
+    //         const div_number = document.createElement('div');
+    //         const select_vote = document.createElement('select');
+    //         const group = document.createElement('div');
+    //         const identity = document.createElement('div');
+    //
+    //         const target_player_item = target_data.filter(v => Number(v.game_id) === Number(i + 1))[0];
+    //
+    //         div_number.innerHTML = (i + 1) + '号玩家';
+    //         group.innerHTML = target_player_item['group'];
+    //         identity.innerHTML = target_player_item['identity'];
+    //
+    //         group.style.fontSize = '35px';
+    //         identity.style.fontSize = '35px';
+    //         vote_li.className = 'vote_li'
+    //
+    //         for (let j = 0; j < 3; j++) {
+    //             const option = document.createElement('option');
+    //             option.innerHTML = j;
+    //             option.value = j;
+    //             if (Number(option.value) == Number(target_data[i]['vote_count'])) {
+    //                 option.selected = true;
+    //             }
+    //             select_vote.appendChild(option);
+    //         }
+    //         div_number.className = 'identity_number';
+    //         select_vote.className = 'vote_li_inner_vote';
+    //         select_vote.setAttribute('number', (i + 1));
+    //         select_vote.style.width = '100px';
+    //         vote_li.appendChild(div_number);
+    //         vote_li.appendChild(group);
+    //         vote_li.appendChild(identity);
+    //         vote_li.appendChild(select_vote);
+    //
+    //         ul_dom.appendChild(vote_li);
+    //     }
+    // }
+
+    function confirm_vote() {
+        const vote_data = [];
+        $('.vote_li_inner_vote').each(function () {
+            const item = [];
+            item.push($(this).attr('number'));
+            item.push($(this).val());
+            vote_data.push(item);
+        })
+        $.ajax({
+            url: '/admin/confirmVote',
+            type: 'post',
+            data: {
+                result: JSON.stringify(vote_data)
+            },
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    if (d === 'suc') {
+                        alert('设置成功');
+                    } else if (d === 'fail') {
+                        alert('数据未变动');
+                    } else if (d === 'game_end') {
+                        alert('游戏已结束，设置失败！');
+                    }
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+        // console.log('vd:', vote_data);
+    }
+
+    function game_start() {
+        if (confirm('确定开始游戏吗？')) {
+            if (if_all_player_ready) {
+                $.ajax({
+                    url: '/admin/gameStart',
+                    type: 'get',
+                    success: function (d, s, x) {
+                        if (s == 'success') {
+                            if (d === 'suc' || d === 'started') {
+                                alert('游戏已开始')
+                            } else if (d === 'fail') {
+                                alert('还有玩家身份未确定！');
+                            } else if (d === 'game_end') {
+                                alert('游戏已结束！');
+                            } else if (d === 'gaming') {
+                                alert('游戏正在进行！');
+                            } else if (d === 'game_id_not_ready') {
+                                alert('还有玩家还未选座位号！');
+                            } else if (d === 'none_player') {
+                                alert('还没有玩家加入游戏！');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+
+            } else {
+                alert('还有玩家未进入游戏！');
+            }
+        }
+    }
+
+    function vote_start() {
+        if (confirm('确定开始投票吗？')) {
+            $.ajax({
+                url: '/admin/startVote',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d === 'have_vote') {
+                            alert('投票已经开始,无需再开始！')
+                        } else if (d === 'start_suc') {
+                            alert('投票开始！');
+                        } else if (d === 'not_gaming') {
+                            alert('游戏还未开始！');
+                        }
+                    }
+                },
+                error: function (e) {
+                    alert('网络错误:', e)
+                }
+            })
+        }
+    }
+
+    function vote_end() {
+        if (confirm('确定结束投票吗？')) {
+            $.ajax({
+                url: '/admin/endVote',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d === 'have_voted_end') {
+                            alert('投票已经结束！');
+                        } else if (d === 'end_suc') {
+                            alert('投票结束！');
+                        } else if (d === 'not_gaming') {
+                            alert('游戏还未开始！');
+                        } else {
+                            alert('投票结束失败,错误信息:' + d);
+                        }
+                    }
+                },
+                error: function (e) {
+                    alert('网络错误:', e)
+                }
+            })
+        }
+    }
+
+    function alert_out_player(player_arr) {
+        for (let i = 0; i < player_arr.length; i++) {
+            alert(player_arr[i] + '号玩家已出局');
+        }
+    }
+
+
+    function query_game_live_data() {
+        $.ajax({
+            url: '/admin/queryGameLiveData',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    $('#this_game_status').html(d.stat);
+                    if (Number(d.vote_round_count) > Number($('#voted_count').html()) && $('#voted_count').html() !== '') {
+                        if_cike_voice_played = false;
+                    }
+                    $('#voted_count').html(d.vote_round_count);
+                    $('#round_vote_count').html(d.voted_player_count);
+                    // $('#out_player_count').html(d.out_player_count);
+                    $('#all_alive_player_count').html('/' + d.alive_player_count);
+                    // $('#number_ready_player_count').html(d.ready_number + '/' + d.all_player_count);
+                    $('#bantalk_player_game_id').html(d.bantalk_str);
+                    $('#prisoner_player_game_id').html(d.prison_str);
+                    $('#escore').html(d.e_mini_task_score);
+                    $('#baobiao_bundle').html(d.baobiao_bundle);
+                    $('#meipo_bundle').html(d.meipo_bundle);
+                    $('#baozhawang_bundle').html(d.baozhawang_bundle);
+                    alert_out_player(d.alert_out_player);
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    // (function create_vote_time_setting_dom() {
+    //     $.ajax({
+    //         url: '/admin/queryVoteTimeSetting',
+    //         type: 'get',
+    //         success: function (d, s, x) {
+    //             if (s == 'success') {
+    //                 $('#vote_time_setting_con').empty();
+    //                 const label = document.createElement('label');
+    //                 label.innerHTML = '投票时间设置';
+    //                 label.style.marginRight = '10px';
+    //                 const select_dom = document.createElement('select');
+    //                 select_dom.name = 'vote_time_setting';
+    //                 select_dom.id = 'vote_time_setting';
+    //                 select_dom.style.marginLeft = '10px';
+    //                 select_dom.addEventListener('change', update_vote_time_setting);
+    //                 const option10 = document.createElement('option');
+    //                 option10.value = 10;
+    //                 option10.innerHTML = '10';
+    //                 if (Number(d) === Number(option10.value)) {
+    //                     option10.selected = true;
+    //                 }
+    //                 const option15 = document.createElement('option');
+    //                 option15.value = 15;
+    //                 option15.innerHTML = '15';
+    //                 if (Number(d) === Number(option15.value)) {
+    //                     option15.selected = true;
+    //                 }
+    //                 const option20 = document.createElement('option');
+    //                 option20.value = 20;
+    //                 option20.innerHTML = '20';
+    //                 if (Number(d) === Number(option20.value)) {
+    //                     option20.selected = true;
+    //                 }
+    //                 const option25 = document.createElement('option');
+    //                 option25.value = 25;
+    //                 option25.innerHTML = '25';
+    //                 if (Number(d) === Number(option25.value)) {
+    //                     option25.selected = true;
+    //                 }
+    //                 const option30 = document.createElement('option');
+    //                 option30.value = 30;
+    //                 option30.innerHTML = '30';
+    //                 if (Number(d) === Number(option30.value)) {
+    //                     option30.selected = true;
+    //                 }
+    //                 const option40 = document.createElement('option');
+    //                 option40.value = 40;
+    //                 option40.innerHTML = '40';
+    //                 if (Number(d) === Number(option40.value)) {
+    //                     option40.selected = true;
+    //                 }
+    //                 const option50 = document.createElement('option');
+    //                 option50.value = 50;
+    //                 option50.innerHTML = '50';
+    //                 if (Number(d) === Number(option50.value)) {
+    //                     option50.selected = true;
+    //                 }
+    //                 const option60 = document.createElement('option');
+    //                 option60.value = 60;
+    //                 option60.innerHTML = '60';
+    //                 if (Number(d) === Number(option60.value)) {
+    //                     option60.selected = true;
+    //                 }
+    //                 const option0 = document.createElement('option');
+    //                 option0.value = 0;
+    //                 option0.innerHTML = '无限制';
+    //                 if (Number(d) === Number(option0.value) || d === 'game_not_exist') {
+    //                     option0.selected = true;
+    //                 }
+    //                 select_dom.appendChild(option10);
+    //                 select_dom.appendChild(option15);
+    //                 select_dom.appendChild(option20);
+    //                 select_dom.appendChild(option25);
+    //                 select_dom.appendChild(option30);
+    //                 select_dom.appendChild(option40);
+    //                 select_dom.appendChild(option50);
+    //                 select_dom.appendChild(option60);
+    //                 select_dom.appendChild(option0);
+    //                 document.getElementById('vote_time_setting_con').appendChild(label);
+    //                 document.getElementById('vote_time_setting_con').appendChild(select_dom);
+    //             }
+    //         },
+    //         error: function (e) {
+    //             console('网络错误:' + e);
+    //         }
+    //     })
+    //
+    // })()
+
+    function update_vote_time_setting(t) {
+        // console.log(t.value);
+        $.ajax({
+            url: '/admin/voteTimeSet',
+            type: 'post',
+            data: {
+                time_data: this.value
+            },
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    if (d === 'suc') {
+                        alert('设置成功！');
+                    } else if (d === 'game_not_exist') {
+                        alert('游戏还未创建！');
+                    } else {
+                        alert('设置失败！');
+                    }
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    function game_end() {
+        if (confirm('是否结束本局游戏并判定胜利阵营为' + $('#game_winner_select').val() + '？')) {
+            $.ajax({
+                url: '/admin/endGame',
+                type: 'post',
+                data: {
+                    winner: $('#game_winner_select').val()
+                },
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d === 'end_suc') {
+                            clearInterval(pc_inter_handle);
+                            alert('游戏已结束！')
+                        } else if (d === 'have_end') {
+                            alert('游戏已结束,无需结束！');
+                        }
+                    }
+                },
+                error: function (e) {
+                    alert('网络错误:', e)
+                }
+            })
+        }
+    }
+
+    function query_join_player_create_dom(data) {
+        if (document.getElementById('join_player_list_con_id') != null) {
+            $('#join_player_list_con_id').remove();
+        }
+        const con = document.createElement('div');
+        con.id = 'join_player_list_con_id';
+        const label = document.createElement('div');
+        label.innerHTML = '已加入游戏玩家列表';
+        label.style.color = 'deepskyblue';
+        $(con).append(label);
+        for (let i = 0; i < data.length; i++) {
+            const item = document.createElement('div');
+            item.innerHTML = '玩家id：' + data[i].username;
+            item.className = 'join_player_item';
+            $(con).append(item);
+        }
+        if (document.getElementById('player_wait_stat_dom_id') != null) {
+            $('#player_wait_stat_dom_id').after(con);
+        }
+    }
+
+    function playAudioAndReturnPromise(audio) {
+        return new Promise((resolve, reject) => {
+            audio.play().then(() => {
+                resolve(); // 播放成功后调用resolve
+            }).catch(error => {
+                reject(error); // 播放失败时调用reject
+            });
+        });
+    }
+
+    async function query_player_skill_create_dom(data) {
+        if (document.getElementById('player_skill_list_con_id') != null) {
+            $('#player_skill_list_con_id').remove();
+        }
+        const con = document.createElement('div');
+        con.id = 'player_skill_list_con_id';
+        const label = document.createElement('div');
+        label.innerHTML = '已发动技能玩家列表';
+        label.style.color = 'deepskyblue';
+        label.style.width = '100%';
+        label.style.textAlign = 'center';
+        $(con).append(label);
+        data.sort((a, b) => {
+            if (a.use_skill_time < b.use_skill_time) {
+                return -1;
+            }
+            if (a.use_skill_time > b.use_skill_time) {
+                return 1;
+            }
+            return 0;
+        });
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].if_use_skill) {
+                const item = document.createElement('div');
+                if (['侦探', '观鸟者', '警长', '刺客', '乌鸦', '和平鸽'].indexOf(data[i].identity) !== -1) {
+                    item.innerHTML = data[i].game_id + '号' + data[i].identity + '已发动技能，' + '目标为' + data[i]['skill_data']['target_id'] + '号玩家';
+                } else {
+                    item.innerHTML = data[i].game_id + '号' + data[i].identity + '已发动技能';
+                }
+
+                item.className = 'player_skill_item';
+                $(con).append(item);
+                if (data[i].identity === '刺客' && !if_cike_voice_played) {
+                    if_cike_voice_played = true;
+                    const audio = document.getElementById("cikeAudio");
+                    await playAudioAndReturnPromise(audio);
+                    alert(data[i].game_id + '号刺客已发动技能');
+                    // new Promise(function (s, r) {
+                    //     audio.play().then(s()).catch(err => r(err));
+                    // }).then(v => alert(data[i].game_id + '号刺客已发动技能')).catch(e => console.log(e));
+                }
+            }
+        }
+        if (document.getElementById('game_status_data_id') != null) {
+            $('#game_status_data_id').after(con);
+        }
+    }
+
+    function query_not_select_number_player(d) {
+        var players = '';
+        for (let i = 0; i < d.length; i++) {
+            if (d[i].game_id == null) {
+                players += d[i].username + '    ';
+            }
+        }
+        $('#not_sel_no_player').html(players);
+    }
+
+    function query_join_player() {
+        $.ajax({
+            url: '/admin/queryJoinPlayer',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    query_join_player_create_dom(d);
+                    query_player_skill_create_dom(d);
+                    query_not_select_number_player(d);
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    function allow_use_skill() {
+        $.ajax({
+            url: '/admin/allowUseSkill',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    if (d === 'suc') {
+                        alert('已允许发动技能');
+                    } else if (d === 'fail') {
+                        alert('游戏还未开始');
+                    } else {
+                        console.log(d);
+                    }
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    function disallow_use_skill() {
+        $.ajax({
+            url: '/admin/disAllowUseSkill',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    if (d === 'suc') {
+                        alert('已禁止发动技能');
+                    } else if (d === 'fail') {
+                        alert('游戏还未开始');
+                    } else {
+                        console.log(d);
+                    }
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    function create_end_game_options_dom(data) {
+        for (let i = 0; i < data.length; i++) {
+            let option = document.createElement('option');
+            option.value = data[i];
+            option.innerHTML = data[i];
+            $('#game_winner_select').append(option);
+        }
+        let lianren_option = document.createElement('option');
+        lianren_option.value = '恋人';
+        lianren_option.innerHTML = '恋人';
+        $('#game_winner_select').append(lianren_option);
+    }
+
+    function add_end_game_winner_option() {
+        $.ajax({
+            url: '/admin/sendZhongliRoles',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    create_end_game_options_dom(d);
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    add_end_game_winner_option();
+
+    query_join_player_handle = setInterval(query_join_player, 1000);
+
+    game_info_data_handle = setInterval(query_game_live_data, 1000);
+</script>
+</html>

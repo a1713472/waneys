@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>游戏准备</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        :root {
+            --page_center_spacing: 80px;
+        }
+
+        body {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background: linear-gradient(135deg, #0e1a2b 0%, #1b2735 100%);  /* 深蓝色渐变背景 */
+    color: #FFFFFF;  /* 使用白色文字 */
+    font-family: "Roboto", sans-serif;
+}
+
+h1, p {
+    color: #FFFFFF;  /* 主标题和段落文字为白色 */
+}
+
+button {
+    background-color: #4A90E2;  /* 按钮背景颜色 */
+    color: #FFFFFF;  /* 按钮文字颜色 */
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #6C63FF;  /* 悬停时按钮颜色变化 */
+    transform: translateY(-3px);
+}
+
+/* 适用于一些次要文本的浅灰色 */
+.secondary-text {
+    color: #D3D3D3;  /* 浅灰色文字 */
+}
+
+/* 游戏准备信息区域 */
+.ready_con {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 35px;
+}
+
+/* 按钮文字颜色 */
+.exit_login {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    border: none;
+    padding: 15px 30px;
+    background-color: coral;
+    font-size: 25px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.exit_login:hover {
+    background-color: #FF6347;  /* 退出按钮悬停效果 */
+    transform: translateY(-3px);
+}
+        .bkg_img {
+            width: 20%;
+            object-fit: contain;
+            margin-bottom: var(--page_center_spacing);
+            margin-top: 50px;
+        }
+
+        .ready_con {
+            width: 100vw;
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+        }
+
+        .select_number_label {
+            font-size: 35px;
+            margin-right: 20px;
+        }
+
+        .select_number_radio {
+            width: 35px;
+            height: 35px;
+            margin-left: 20px;
+        }
+
+        #select_number_inner_con_id {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: flex-start;
+            align-items: center;
+            width: 80vw;
+            margin: 30px auto;
+        }
+
+        .select_number_inner_radio_con {
+            width: 100%;
+            display: flex;
+            flex-flow: row wrap;
+            align-items: center;
+            align-content: flex-start;
+        }
+
+        .select_number_inner_label_radio_con {
+            display: flex;
+            flex-flow: row nowrap;
+            width: 50%;
+            box-sizing: border-box;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        #number_ready_id {
+            font-size: 35px;
+            color: deepskyblue;
+        }
+
+        .exit_login {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            border: none;
+            padding: 20px 40px;
+            background-color: coral;
+            font-size: 25px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .join_player_item {
+            margin: 20px;
+            word-break: break-all;
+        }
+
+        #join_player_list_con_id {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: space-evenly;
+            align-items: center;
+            font-size: 35px;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+            width: 80vw;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        #mask_bill1 {
+            display: none;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            filter: blur(10px);
+            z-index: 9999;
+        }
+
+        #mask_bill2 {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background-color: white;
+            z-index: 10000;
+            border-radius: 10px;
+
+        }
+
+
+        #bill_detail {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-evenly;
+            flex-flow: column;
+            align-items: center;
+            font-size: 22px;
+        }
+    </style>
+</head>
+<body>
+<div style="display: flex;justify-content: center;align-items: center;" class="main_div">
+    <img src="/static/img/bkg_img.png" alt="" class="bkg_img">
+</div>
+<button type="button" class="exit_login main_div" onclick="exit_login()">退出登录</button>
+<div class="ready_con main_div" id="ready_con_id">
+    <div style="margin-bottom: 50px;">
+        游戏准备
+    </div>
+    <button style="font-size: 35px;background-color: lightgreen;color: white;padding: 20px 60px;border: none;"
+            onclick="user_ready()" id="ready_button_id">准备就绪，开始游戏
+    </button>
+</div>
+<div id="mask_bill1">
+
+</div>
+<div id="mask_bill2">
+    <img src="/static/img/cha_normal.png" alt="" width="40" height="40"
+         style="position: absolute;right: 50px;top: 50px;" onclick="close_bill_detail()">
+    <div id="bill_detail">
+        <div>
+            您本次消费明细：
+        </div>
+        <div>
+            <span>游戏时长：</span>
+            <span id="bill_game_duration"></span>
+        </div>
+        <div>
+            <span>消费金额：</span>
+            <span id="bill_consumption"></span>
+        </div>
+        <div>
+            <span>账户余额：</span>
+            <span id="bill_remainder"></span>
+        </div>
+    </div>
+
+</div>
+</body>
+<script>
+    //禁止双指放大缩小页面
+    document.documentElement.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    }, false);
+
+    //禁止双击放大缩小页面
+    var lastTouchEnd = 0;
+    document.documentElement.addEventListener('touchend', function (event) {
+        var now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+
+    var inter_handle = null;
+    var if_self_join_game_handle = null;
+    var number_ready_handle = null;
+    var player_join_and_number_ready_handle = null;
+    var query_join_game_player_handle = null;
+
+    const game_id = '{$game_id}';
+
+    function create_select_number_dom(target_arr) {
+        if (document.getElementById('select_number_inner_con_id') == null) {
+            const con = document.createElement('div');
+            const hint = document.createElement('p');
+            const clear_btn = document.createElement('button');
+            const radio_con = document.createElement('div');
+            const number_ready = document.createElement('div');
+
+            number_ready.id = 'number_ready_id';
+            hint.innerHTML = '选择座位号';
+            hint.className = 'select_number_hint';
+            radio_con.className = 'select_number_inner_radio_con';
+            con.id = 'select_number_inner_con_id';
+            for (let i = 0; i < target_arr.number.length; i++) {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                const div = document.createElement('div');
+
+                div.className = 'select_number_inner_label_radio_con';
+                div.id = 'select_number_inner_label_radio_con_id' + target_arr.number[i];
+                label.setAttribute('for', 'select_number' + target_arr.number[i]);
+                label.innerHTML = target_arr.number[i] + '号';
+                label.className = 'select_number_label';
+                input.name = 'select_number_group';
+                input.className = 'select_number_radio';
+                input.id = 'select_number' + target_arr.number[i];
+                input.type = 'radio';
+                input.value = target_arr.number[i];
+                input.checked = input.value == target_arr.self_number;
+                input.addEventListener('click', function (e) {
+                    var selectedValue = e.target.value;
+                    e.preventDefault();
+                    const that = this;
+                    $.ajax({
+                        url: '/index/updateSelectedNumber',
+                        type: 'post',
+                        data: {
+                            sel: selectedValue
+                        },
+                        success: function (d, s, x) {
+                            if (s === 'success') {
+                                if (d === 'suc') {
+                                    $('.select_number_radio').prop('checked', false);
+                                    $(that).prop('checked', true);
+                                    alert('您已占' + selectedValue + '号座');
+                                } else if (d === 'number_ready_other') {
+                                    alert('该座位已有玩家占座');
+                                } else if (d === 'you_are_not_in_game') {
+                                    alert('您未加入该游戏');
+                                }
+                            }
+                        },
+                        error: function (e) {
+                            alert('网络错误:' + e);
+                        }
+                    })
+
+                });
+                div.appendChild(label);
+                div.appendChild(input);
+                radio_con.appendChild(div);
+            }
+
+            con.appendChild(hint);
+            con.appendChild(radio_con);
+            con.appendChild(number_ready);
+            document.getElementById('ready_con_id').appendChild(con);
+        }
+        const fresh_dom = document.getElementById('all_player_stat_fresh_id');
+        if (fresh_dom == null) {
+            const dom = document.createElement('div');
+            dom.id = 'all_player_stat_fresh_id';
+            dom.innerHTML = '玩家已全部就绪，等待玩家选择座位号...';
+            dom.style.color = 'deepskyblue';
+            dom.style.fontSize = '35px';
+            dom.style.margin = '30px 0';
+            $('#ready_con_id').append(dom);
+            $('#ready_button_id').css({
+                'margin-bottom': '50px'
+            });
+
+
+        } else {
+            fresh_dom.innerHTML = '玩家已全部就绪，等待玩家选择座位号...';
+        }
+    }
+
+    function query_select_number_stat() {
+        $.ajax({
+            url: '/index/querySelectedNumberStat',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    create_select_number_dom(d);
+                    if (number_ready_handle === null) {
+                        number_ready_handle = setInterval(update_select_number_stat, 1000);
+                    }
+
+                }
+            },
+            error: function (e) {
+                alert('网络错误:' + e);
+            }
+        })
+    }
+
+    function update_not_select_number_stat(data) {
+        if (document.getElementsByClassName('select_number_inner_radio_con') != null) {
+            const number_arr = $('.select_number_inner_radio_con').children();
+            number_arr.each((i, v) => {
+                const radio_value = $(v).children('.select_number_radio').val();
+                const target_number = data.filter(fv => Number(fv.game_id) === Number(radio_value));
+                if (target_number.length === 0) {
+                    if (document.getElementById('not_select_number' + radio_value) == null) {
+                        const not_select_hint = document.createElement('span');
+                        not_select_hint.innerHTML = '未选择';
+                        not_select_hint.style.fontSize = '22px';
+                        not_select_hint.style.color = 'coral';
+                        not_select_hint.style.position = 'absolute';
+                        not_select_hint.style.right = '0';
+                        not_select_hint.style.top = '50%';
+                        not_select_hint.style.transform = 'translateY(-50%)';
+                        not_select_hint.id = 'not_select_number' + radio_value;
+                        $(v).append(not_select_hint);
+                    }
+                } else {
+                    if (document.getElementById('not_select_number' + radio_value) != null) {
+                        $('#not_select_number' + radio_value).remove();
+                    }
+
+                }
+
+            })
+        }
+    }
+
+    function update_select_number_stat() {
+        $.ajax({
+            url: '/index/querySelectedNumberPlayer',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    $('#number_ready_id').html('已选座玩家：' + d.number_ready + '/' + d.player_count);
+                    update_not_select_number_stat(d.all_player);
+
+                    if (Number(d.number_ready) === Number(d.player_count)) {
+                        document.getElementById('all_player_stat_fresh_id').innerHTML = '玩家已全部就绪，等待后台发放身份...';
+                    }
+                }
+            },
+            error: function (e) {
+                alert('网络错误:' + e);
+            }
+        })
+    }
+
+    function update_player_stat() {
+        $.ajax({
+            url: '/index/freshGameStat',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    const fresh_dom = document.getElementById('all_player_stat_fresh_id');
+                    if (d.if_all_player_ready != 'true') {
+                        if (fresh_dom == null) {
+                            const dom = document.createElement('div');
+                            dom.id = 'all_player_stat_fresh_id';
+                            dom.innerHTML = '已加入游戏玩家：' + d.exist + '/' + d.all;
+                            dom.style.color = 'deepskyblue';
+                            dom.style.fontSize = '35px';
+                            $('#ready_con_id').append(dom);
+                            $('#ready_button_id').css({
+                                'margin-bottom': '50px'
+                            });
+
+
+                        } else {
+                            fresh_dom.innerHTML = '已加入游戏玩家：' + d.exist + '/' + d.all;
+                        }
+                    }
+
+                    if (d.if_all_player_ready == 'true') {
+                        query_select_number_stat();
+                        clearInterval(player_join_and_number_ready_handle);
+                    }
+                }
+            },
+            error: function (e) {
+                alert('网络错误:', e);
+            }
+        })
+    }
+
+    function user_ready() {
+        const psw = prompt('请输入房间密码');
+        if (psw) {
+            $.ajax({
+                url: '/index/joinTheGame',
+                type: 'post',
+                data: {
+                    join_psw: psw
+                },
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        if (d === 'suc') {
+                            // $('#ready_button_id').prop('disabled', 'true');
+                            alert('您已加入游戏');
+                        } else if (d === 'fail') {
+                            alert('人数已满，加入游戏失败');
+                        } else if (d === 'repeat') {
+                            alert('您已加入游戏,请勿重复点击');
+                        } else if (d === 'has_refused') {
+                            alert('您已被拒绝加入游戏');
+                        } else if (d === 'has_reviewed') {
+                            alert('后台正在审核，请耐心等待');
+                        } else if (d === 'psw_error') {
+                            alert('密码错误');
+                        } else {
+                            alert('加入失败,错误信息:' + d);
+                        }
+                    }
+                },
+                error: function (e) {
+                    alert('网络错误:' + e);
+                }
+            })
+        } else {
+            // alert("房间密码取消输入");
+        }
+
+    }
+
+    function query_if_start_game() {
+        $.ajax({
+            url: '/index/queryGameStat',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    if (d === 'game_start') {
+                        location.href = '/index/gamePage';
+                    } else if (d === 'game_end') {
+                        clearInterval(inter_handle);
+                        alert('游戏已结束');
+                        location.href = '/index/waitGame';
+                    }
+                }
+            },
+            error: function (e) {
+                alert('网络错误:' + e);
+            }
+        })
+    }
+
+    // if_self_join_game_handle = setInterval(function () {
+    //     $.ajax({
+    //         url: '/index/queryIfSelfJoinGame',
+    //         type: 'get',
+    //         success: function (d, s, x) {
+    //             if (s === 'success') {
+    //                 if (d === 'suc') {
+    //                     clearInterval(if_self_join_game_handle);
+    //                     alert('后台审核通过，您已成功加入游戏！');
+    //                 }
+    //             }
+    //         },
+    //         error: function (e) {
+    //             alert('网络错误:', e);
+    //         }
+    //     })
+    // }, 1000);
+    //
+    // if_self_deny_game_handle = setInterval(function () {
+    //     $.ajax({
+    //         url: '/index/queryIfdenyJoinGame',
+    //         type: 'get',
+    //         success: function (d, s, x) {
+    //             if (s === 'success') {
+    //                 if (d === 'deny') {
+    //                     clearInterval(if_self_deny_game_handle);
+    //                     alert('后台已拒绝您加入游戏');
+    //                 }
+    //             }
+    //         },
+    //         error: function (e) {
+    //             alert('网络错误:', e);
+    //         }
+    //     })
+    // }, 1000);
+
+    function query_join_player_create_dom(data) {
+        if (document.getElementById('join_player_list_con_id') != null) {
+            $('#join_player_list_con_id').remove();
+        }
+        const con = document.createElement('div');
+        con.id = 'join_player_list_con_id';
+        const label = document.createElement('div');
+        label.innerHTML = '已加入游戏玩家列表';
+        label.style.color = 'deepskyblue';
+        label.style.fontSize = '35px';
+        $(con).append(label);
+        for (let i = 0; i < data.length; i++) {
+            const item = document.createElement('div');
+            item.innerHTML = '玩家id：' + data[i].username;
+            item.className = 'join_player_item';
+            $(con).append(item);
+        }
+        if (document.getElementById('ready_con_id') != null) {
+            $('#ready_con_id').after(con);
+        }
+    }
+
+    function query_join_player() {
+        $.ajax({
+            url: '/index/queryJoinPlayer',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    query_join_player_create_dom(d);
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    function exit_login() {
+        $.ajax({
+            url: '/index/exitLogin',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    if (d === 'suc') {
+                        location.reload();
+                    }
+                }
+            },
+            error: function (e) {
+                alert('网络错误:', e)
+            }
+        })
+    }
+
+    query_join_game_player_handle = setInterval(query_join_player, 1000);
+
+    player_join_and_number_ready_handle = setInterval(update_player_stat, 1000);
+
+    inter_handle = setInterval(function () {
+        query_if_start_game();
+    }, 1000);
+
+
+</script>
+
+<!--结账-->
+<script>
+    var bill_info_handle = null;
+
+    bill_info_handle = setInterval(detect_if_settle_account, 1000);
+
+    function update_if_view_bill() {
+        $.ajax({
+            url: '/index/updateIfUserViewBill',
+            type: 'get',
+            success: function (d, s, x) {
+                console.log('结果:', d);
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    function detect_if_settle_account() {
+        $.ajax({
+            url: '/index/detectIfSettleAccount',
+            type: 'get',
+            success: function (d, s, x) {
+                if (s === 'success') {
+                    if (d != 'none') {
+                        update_if_view_bill();
+                        clearInterval(bill_info_handle);
+                        open_mask_bill(d.duration, d.consumption, d.reamainder);
+                    }
+                }
+            },
+            error: function (e) {
+                console.log('网络错误:', e);
+            }
+        })
+    }
+
+    function close_bill_detail() {
+        $('#mask_bill1').css('display', 'none');
+        $('#mask_bill2').css('display', 'none');
+    }
+
+    function open_mask_bill(dur, con, rem) {
+        $('#mask_bill1').css('display', 'block');
+        $('#mask_bill2').css('display', 'block');
+        $('#bill_game_duration').html(dur + '小时');
+        $('#bill_consumption').html(con + '元');
+        $('#bill_remainder').html(rem + '元');
+    }
+
+
+</script>
+</html>

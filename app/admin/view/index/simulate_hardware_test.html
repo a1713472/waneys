@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .li_style {
+            margin: 20px;
+            display: inline-block;
+            padding: 10px 30px;
+            border: 1px solid darkgray;
+            border-radius: 5px;
+        }
+
+        .alive {
+            background-color: limegreen;
+            color: white;
+        }
+
+        .out {
+            background-color: orangered;
+            color: white;
+        }
+
+        .disappeared {
+            background-color: white;
+            color: black;
+        }
+
+        .eaten {
+            background-color: limegreen;
+            color: black;
+        }
+    </style>
+
+</head>
+<body>
+<div id="player_list">
+    <ul id="list_ul">
+
+    </ul>
+</div>
+<div>
+    <div id="ori_player">
+        <span>操作发起人：</span>
+        <span id="ori_id"></span>
+    </div>
+    <div id="target_player">
+        <span>操作目标人：</span>
+        <span id="target_id"></span>
+    </div>
+    <div>
+        <span>操作类型：</span>
+        <span id="ope_type"></span>
+    </div>
+    <div>
+        <button type="button" onclick="ope_knife()">刀人</button>
+        <button type="button" onclick="ope_eat()">吃人</button>
+        <button type="button" onclick="ope_eat_body()">吃尸体</button>
+        <button type="button" onclick="ope_bundle()">绑定</button>
+        <button type="button" onclick="ope_touch()">触碰</button>
+    </div>
+</div>
+<div>
+    <span>警报状态：</span>
+    <span id="alarm"></span>
+</div>
+<div>
+    <span>绑定的两人：</span>
+    <span id="bundle_cp"></span>
+</div>
+<div>
+    <button type="button" onclick="send_ope()">操作</button>
+</div>
+</body>
+<script>
+    const all_player = JSON.parse('{$all_player|raw}');
+    const game_info = JSON.parse('{$game_info|raw}');
+
+    var ope_type = '';
+    var ope_ori = '';
+    var ope_target = '';
+
+    function ope_knife() {
+        ope_type = 'knife';
+        $('#ope_type').html('刀人');
+    }
+
+    function ope_eat() {
+        ope_type = 'eat';
+        $('#ope_type').html('吃人');
+    }
+
+    function ope_eat_body() {
+        ope_type = 'eat_body';
+        $('#ope_type').html('吃尸体');
+    }
+
+    function ope_bundle() {
+        ope_type = 'bundle';
+        $('#ope_type').html('绑定');
+    }
+
+    function ope_touch() {
+        ope_type = 'touch';
+        $('#ope_type').html('触碰');
+    }
+
+    function update_item_status(item, dom) {
+        switch (item.status) {
+            case 'alive': {
+                dom.className = 'li_style alive';
+                $(dom).html(item.game_id + item.identity + '：存活');
+                break;
+            }
+            case 'disappeared': {
+                dom.className = 'li_style disappeared';
+                $(dom).html(item.game_id + item.identity + '：尸体消失');
+                break;
+            }
+            case 'out': {
+                dom.className = 'li_style out';
+                $(dom).html(item.game_id + item.identity + '：死亡');
+                break;
+            }
+            case 'eaten': {
+                dom.className = 'li_style eaten';
+                $(dom).html(item.game_id + item.identity + '：被吃掉');
+                break;
+            }
+        }
+    }
+
+    function update_bundle_players() {
+        for (let i = 0; i < all_player.length; i++) {
+            if (all_player[i].bundle_player !== null) {
+                $('#bundle_cp').html($('#bundle_cp').html() + all_player[i].game_id + '号+' + all_player[i].bundle_player + '号' + '，');
+                // $('#bundle_ori').html(all_player[i].game_id + '号');
+                // $('#bundle_target').html(all_player[i].bundle_player + '号');
+            }
+        }
+    }
+
+    for (let i = 0; i < all_player.length; i++) {
+        const li = document.createElement('li');
+        li.addEventListener('click', () => {
+            if (ope_ori === '') {
+                ope_ori = all_player[i].game_id
+                $('#ori_id').html(all_player[i].game_id + '号' + all_player[i].identity)
+            } else {
+                ope_target = all_player[i].game_id;
+                $('#target_id').html(all_player[i].game_id + '号' + all_player[i].identity)
+            }
+        });
+        $('#list_ul').append(li);
+        update_item_status(all_player[i], li);
+    }
+
+    $('#alarm').html(game_info.if_alarm ? '拉响警报' : '');
+    update_bundle_players();
+
+    function send_ope() {
+        if (ope_ori !== '' && ope_target !== '') {
+            $.ajax({
+                url: '/hardware/Worker/playersOperation',
+                type: 'post',
+                data: {
+                    ori: ope_ori,
+                    target: ope_target
+                },
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        // location.reload(true);
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+    }
+
+</script>
+</html>

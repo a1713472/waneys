@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史对局</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Microsoft YaHei", sans-serif;
+            background: #1a1a1a;
+            color: #FFE4B5;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding: 20px 0;
+            border-bottom: 2px solid rgba(245, 166, 35, 0.3);
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border-radius: 50%;
+            background: rgba(245, 166, 35, 0.1);
+        }
+
+        .back-btn:hover {
+            transform: scale(1.1);
+            background: rgba(245, 166, 35, 0.2);
+        }
+
+        .back-btn::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-left: 3px solid #F5A623;
+            border-bottom: 3px solid #F5A623;
+            transform: rotate(45deg);
+            margin-left: 6px;
+        }
+
+        .title {
+            flex: 1;
+            text-align: center;
+            color: #F5A623;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .match-list {
+            display: grid;
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .match-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(245, 166, 35, 0.1);
+            cursor: pointer;
+        }
+
+        .match-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(245, 166, 35, 0.2);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 228, 181, 0.1);
+        }
+
+        .match-time {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .match-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .player-number {
+            background: #4A90E2;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);
+        }
+
+        .player-identity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .identity-img {
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+        }
+
+        .player-group {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .group-goose {
+            background: linear-gradient(145deg, #7ED321, #6fb91e);
+            color: white;
+        }
+
+        .group-duck {
+            background: linear-gradient(145deg, #D0021B, #bc0218);
+            color: white;
+        }
+
+        .match-result {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 228, 181, 0.1);
+            color: #F5A623;
+            font-size: 14px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* 添加加载动画 */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #F5A623;
+        }
+
+        .loading::after {
+            content: "...";
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ""; }
+            40% { content: "."; }
+            60% { content: ".."; }
+            80% { content: "..."; }
+        }
+
+        /* 无数据提示 */
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .match-detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(245, 166, 35, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(245, 166, 35, 0.5);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(245, 166, 35, 0.7);
+        }
+
+        .modal-header {
+            background: #1a1a1a;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.2);
+        }
+
+        .modal-header h3 {
+            color: #F5A623;
+            margin: 0;
+        }
+
+        .close-btn {
+            color: #999;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #F5A623;
+        }
+
+        .modal-body {
+            padding-top: 10px;
+        }
+
+        .game-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .game-info > div {
+            margin: 5px 0;
+            color: #F5A623;
+        }
+
+        .game-result {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px !important;
+        }
+
+        .players-list {
+            display: grid;
+            gap: 10px;
+            padding-bottom: 10px;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: transform 0.3s;
+            flex-wrap: wrap;
+        }
+
+        .player-item:hover {
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 95%;
+                margin: 10px auto;
+                padding: 15px;
+            }
+
+            .player-item {
+                padding: 8px;
+                gap: 8px;
+            }
+
+            .player-number, .player-identity, .player-group {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+
+            .identity-img {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="back-btn" onclick="goBack()" title="返回"></div>
+            <div class="title">历史对局</div>
+        </div>
+        <div class="match-list" id="matchList">
+            <div class="loading">加载中</div>
+        </div>
+    </div>
+
+    <div class="match-detail-modal" id="matchDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>对局详情</h3>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="game-info">
+                    <div class="game-id"></div>
+                    <div class="game-time"></div>
+                    <div class="game-result"></div>
+                </div>
+                <div class="players-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = '/index/gamePage';
+        }
+
+        function showMatchDetail(gameId) {
+            $.ajax({
+                url: '/index/getMatchDetail',
+                type: 'get',
+                data: { game_id: gameId },
+                success: function(response) {
+                    if (response.code === 0) {
+                        const data = response.data;
+                        
+                        // 更新弹窗内容
+                        $('.game-id').text(`游戏ID: ${data.game_id}`);
+                        $('.game-time').text(`时间: ${data.game_time}`);
+                        $('.game-result').text(`最终结果: ${data.winner}`);
+                        
+                        // 清空并重新填充玩家列表
+                        const playersList = $('.players-list').empty();
+                        data.players.forEach(player => {
+                            playersList.append(`
+                                <div class="player-item">
+                                    <span class="player-number">玩家${player.player_number}号</span>
+                                    <div class="player-identity">
+                                        <img src="/static/identity_img/${player.identity}.png" class="identity-img" alt="${player.identity}">
+                                        <span>${player.identity}</span>
+                                    </div>
+                                    <span class="player-group ${player.group === '鹅' ? 'group-goose' : 'group-duck'}">${player.group}</span>
+                                </div>
+                            `);
+                        });
+                        
+                        // 显示弹窗
+                        $('#matchDetailModal').fadeIn();
+                    } else {
+                        alert(response.msg || '获取详情失败');
+                    }
+                },
+                error: function() {
+                    alert('获取详情失败，请稍后重试');
+                }
+            });
+        }
+
+        function closeModal() {
+            $('#matchDetailModal').fadeOut();
+        }
+
+        function loadHistoryMatches() {
+            console.log('Starting to load history matches...'); // 添加开始加载的日志
+            
+            $.ajax({
+                url: '/index/getHistoryMatches',
+                type: 'get',
+                success: function(response) {
+                    console.log('Raw response:', response); // 打印原始响应
+                    
+                    const matchList = $('#matchList');
+                    matchList.empty();
+                    
+                    if (!response) {
+                        console.error('Response is null or undefined');
+                        matchList.html('<div class="no-data">加载失败，响应数据为空</div>');
+                        return;
+                    }
+                    
+                    if (response.code === 0) {
+                        if (response.data && response.data.length > 0) {
+                            console.log('Found ' + response.data.length + ' matches'); // 打印找到的对局数量
+                            
+                            response.data.forEach((match, index) => {
+                                console.log(`Processing match ${index + 1}:`, match); // 打印每个对局的详细信息
+                                
+                                const matchItem = $(`
+                                    <div class="match-item" onclick="showMatchDetail(${match.game_id})">
+                                        <div class="match-header">
+                                            <span>游戏ID: ${match.game_id}</span>
+                                            <span class="match-time">${match.game_time}</span>
+                                        </div>
+                                        <div class="match-info">
+                                            <span class="player-number">玩家${match.player_number}号</span>
+                                            <div class="player-identity">
+                                                <img src="/static/identity_img/${match.identity}.png" class="identity-img" alt="${match.identity}">
+                                                <span>${match.identity}</span>
+                                            </div>
+                                            <span class="player-group ${match.group === '鹅' ? 'group-goose' : 'group-duck'}">${match.group}</span>
+                                        </div>
+                                        <div class="match-result">
+                                            ${match.status}
+                                        </div>
+                                    </div>
+                                `);
+                                matchList.append(matchItem);
+                            });
+                        } else {
+                            console.log('No matches found'); // 打印没有找到对局的信息
+                            matchList.html('<div class="no-data">暂无历史对局记录</div>');
+                        }
+                    } else {
+                        console.error('Error response:', response); // 打印错误响应
+                        matchList.html(`<div class="no-data">${response.msg || '加载失败'}</div>`);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ajax error:', {
+                        status: status,
+                        error: error,
+                        response: xhr.responseText
+                    });
+                    $('#matchList').html('<div class="no-data">加载失败，请稍后重试</div>');
+                }
+            });
+        }
+
+        // 页面加载时获取历史对局数据
+        $(document).ready(function() {
+            console.log('Document ready, loading matches...'); // 添加页面加载完成的日志
+            loadHistoryMatches();
+        });
+
+        // 点击弹窗外部关闭
+        $(document).on('click', '.match-detail-modal', function(e) {
+            if ($(e.target).is('.match-detail-modal')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html> 

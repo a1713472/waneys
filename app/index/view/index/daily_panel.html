@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日活动</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        .daily-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            color: #FFE4B5;
+        }
+
+        .sign-in-section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sign-in-days {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .day-item {
+            width: 60px;
+            height: 80px;
+            border: 1px solid #4A90E2;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .day-item.active {
+            background: rgba(74, 144, 226, 0.2);
+            border-color: #6C63FF;
+            transform: scale(1.05);
+        }
+
+        .day-item.completed {
+            background: rgba(74, 144, 226, 0.4);
+        }
+
+        .day-item.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: #4CAF50;
+            font-size: 14px;
+        }
+
+        .tasks-section {
+            margin-top: 20px;
+        }
+
+        .task-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin: 5px 0;
+        }
+
+        .task-progress-bar {
+            height: 100%;
+            background: #4A90E2;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .task-rewards {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .reward-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .reward-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        #signInBtn {
+            padding: 10px 30px;
+            background: #4A90E2;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        #signInBtn:hover {
+            background: #357ABD;
+            transform: translateY(-2px);
+        }
+
+        #signInBtn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="daily-panel">
+        <div class="sign-in-section">
+            <h2>每日签到</h2>
+            <div class="sign-in-days" id="signInDays"></div>
+            <button id="signInBtn" onclick="signIn()">签到</button>
+        </div>
+
+        <div class="tasks-section">
+            <h2>每日任务</h2>
+            <div id="tasksList"></div>
+        </div>
+    </div>
+
+    <script>
+        // 加载签到信息
+        function loadSignInInfo() {
+            $.ajax({
+                url: '/index/getSignInInfo',
+                type: 'get',
+                success: function(response) {
+                    if (response.code === 0) {
+                        renderSignInDays(response.data);
+                    }
+                }
+            });
+        }
+
+        // 渲染签到天数
+        function renderSignInDays(data) {
+            const container = $('#signInDays');
+            container.empty();
+            
+            for (let i = 1; i <= 7; i++) {
+                const dayDiv = $(`
+                    <div class="day-item ${i === data.currentDay ? 'active' : ''} ${i < data.currentDay ? 'completed' : ''}">
+                        <span>第${i}天</span>
+                        <div class="rewards">
+                            <div class="reward-item">
+                                <img src="/static/img/coin.png" class="reward-icon">
+                                <span>${data.rewards[i].coins}</span>
+                            </div>
+                            <div class="reward-item">
+                                <img src="/static/img/exp.png" class="reward-icon">
+                                <span>${data.rewards[i].exp}</span>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                container.append(dayDiv);
+            }
+
+            // 更新签到按钮状态
+            $('#signInBtn').prop('disabled', data.hasSignedToday)
+                .text(data.hasSignedToday ? '今日已签到' : '立即签到');
+        }
+
+        // 签到
+        function signIn() {
+            $('#signInBtn').prop('disabled', true).text('签到中...');
+            
+            $.ajax({
+                url: '/index/signIn',
+                type: 'post',
+                success: function(response) {
+                    if (response.code === 0) {
+                        alert(`签到成功！\n获得金币: ${response.data.rewards.coins}\n获得经验: ${response.data.rewards.exp}`);
+                        loadSignInInfo();
+                        updateUserStats();
+                    } else {
+                        alert(response.msg || '签到失败，请稍后重试');
+                        $('#signInBtn').prop('disabled', false).text('立即签到');
+                    }
+                },
+                error: function() {
+                    alert('网络错误，请稍后重试');
+                    $('#signInBtn').prop('disabled', false).text('立即签到');
+                }
+            });
+        }
+
+        // 加载每日任务
+        function loadDailyTasks() {
+            $.ajax({
+                url: '/index/getDailyTasks',
+                type: 'get',
+                success: function(response) {
+                    if (response.code === 0) {
+                        renderTasks(response.data);
+                    }
+                }
+            });
+        }
+
+        // 渲染任务列表
+        function renderTasks(tasks) {
+            const container = $('#tasksList');
+            container.empty();
+            
+            tasks.forEach(task => {
+                const progress = (task.progress / task.target) * 100;
+                const taskDiv = $(`
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-name">${task.description}</div>
+                            <div class="task-progress">
+                                <div class="task-progress-bar" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="task-status">${task.progress}/${task.target}</div>
+                        </div>
+                        <div class="task-rewards">
+                            <div class="reward-item">
+                                <img src="/static/img/coin.png" class="reward-icon">
+                                <span>${task.rewards_coins}</span>
+                            </div>
+                            <div class="reward-item">
+                                <img src="/static/img/exp.png" class="reward-icon">
+                                <span>${task.rewards_exp}</span>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                container.append(taskDiv);
+            });
+        }
+
+        // 页面加载时初始化
+        $(document).ready(function() {
+            loadSignInInfo();
+            loadDailyTasks();
+        });
+    </script>
+</body>
+</html> 

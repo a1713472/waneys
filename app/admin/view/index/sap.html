@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>后台结账管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/static/css/main_ope_container.css">
+    <link rel="stylesheet" href="/static/css/main_content_zone.css">
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <script src="/static/layui/layui.js"></script>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+
+        }
+
+        ol li {
+
+            list-style-type: decimal;
+
+            list-style-position: inside;
+
+        }
+
+
+        .header {
+            width: 100%;
+            height: 5vh;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+
+        .company_name {
+            width: 200px;
+            height: 100%;
+            background-color: rgba(119, 123, 202, 0.67);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+            z-index: 4;
+            flex: none;
+        }
+
+        .user_info {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            background-color: rgb(82, 85, 153);
+            flex: 1 0 auto;
+        }
+
+        .user_img {
+            width: 40px;
+            height: 40px;
+            margin-right: 20px;
+            border-radius: 50%;
+        }
+
+        .user_name {
+            color: white;
+            font-size: 17px;
+            transition: all 0.5s;
+        }
+
+        .navi_container {
+
+        }
+
+        .navi_mainope_container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        #img_and_name_container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 240px;
+            flex: none;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: 5vh;
+            box-sizing: border-box;
+            background-color: rgb(82, 85, 153);
+            padding-right: 40px;
+            transition: all 0.5s;
+        }
+
+        #user_hover_container {
+            width: 160px;
+            height: 160px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: 2;
+        }
+
+        #img_and_name_container:hover + .user_center {
+            display: block;
+            z-index: 9;
+        }
+
+        #img_and_name_container:hover {
+            background-color: slateblue;
+        }
+
+
+        .user_center:hover {
+            display: block;
+        }
+
+        .user_center {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 0px;
+            width: 180px;
+            height: 100px;
+            background-color: white;
+            border: 1px solid lightslategrey;
+            box-shadow: 2px 2px 2px 2px lightslategrey;
+            box-sizing: border-box;
+            z-index: 9;
+            background-color: white;
+        }
+
+        .edit_info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: lightslategrey;
+            height: 33%;
+            width: 100%;
+            transition: all 0.5s;
+            cursor: pointer;
+
+        }
+
+        .edit_info:hover {
+            background-color: lightslategrey;
+            color: white;
+        }
+
+        .navi_container {
+            max-width: 200px;
+            height: 95vh;
+            background-color: rgb(57, 61, 73);
+            flex: 1 0 auto;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="header" id="header_id">
+    <div class="company_name">鹅鸭杀后台</div>
+    <div class="user_info">
+        <div id="img_and_name_container">
+            <div class="user_name" id="admin_user_name">管理员:{$username}</div>
+        </div>
+    </div>
+</div>
+<div class="navi_mainope_container">
+    <div class="navi_container">
+        <div>
+            <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="left_nav">
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a>结账设置<i class="layui-icon layui-icon-down layui-nav-more"></i></a>
+                    <dl class="layui-nav-child layui-nav-child-r">
+                        <dd class="left_navi_dd_style"><a>结账信息</a></dd>
+                        <dd class="left_navi_dd_style"><a>用户管理</a></dd>
+                        <dd class="left_navi_dd_style"><a>系统设置</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+    <div class="main_ope_container">
+        <div class="ope_zone_list">
+            <div class="ope_zone_list_move_left" onclick="ope_zone_list_move_left_beha()">
+                <img src="/static/img/move_left.png" alt="" class="ope_zone_list_img_left">
+            </div>
+            <div class="ope_zone_list_tagslist_container">
+                <div class="ope_zone_list_tagslist">
+                    <!--                <div class="single_tag_main" curr_active="true" curr_tagpage="主页"-->
+                    <!--                     style="background-color: rgba(0, 67, 144, 0.2)" onclick="single_tag_main_click_method(this)">主页-->
+                    <!--                </div>-->
+                </div>
+            </div>
+            <div class="ope_zone_list_move_right" onclick="ope_zone_list_move_right_beha()">
+                <img src="/static/img/move_right.png" alt="" class="ope_zone_list_img_right">
+            </div>
+            <div class="ope_zone_list_ope">标签操作<img src="/static/img/arrow_to_down.png" alt=""
+                                                    style="width: 15px;height: 15px;margin-left: 10px;"></div>
+            <div class="ope_zone_list_ope_xiala">
+                <div class="tag_item" onclick="ope_zone_list_ope_close_others()">
+                    关闭其他
+                </div>
+                <div class="tag_item" onclick="ope_zone_list_ope_close_all()">
+                    关闭所有
+                </div>
+            </div>
+
+        </div>
+        <div id="main_content_zone_container">
+            <!--结账信息-->
+            <div id="sap_info" class="single_content_zone">
+                <div id="sap_info_table_con_id">
+                    <table id="sap_info_table" lay-filter="sap_info_table_filter"></table>
+                </div>
+                <div id="playing_user_con_id">
+                    <table id="player_info_table" lay-filter="player_info_table_filter"></table>
+                </div>
+            </div>
+            <!--用户管理-->
+            <div id="user_manage" class="single_content_zone">
+                <div style="margin-bottom: 20px;">
+                    <div class="layui-input-inline" style="margin-left: 20px;">
+                        <input type="number" id="user_manage_phone_search_value" lay-verify="required"
+                               placeholder="请输入用户手机号"
+                               autocomplete="off"
+                               class="layui-input" style="width: 200px;">
+                    </div>
+                    <button onclick="user_manage_search_by_phone()" type="button" class="layui-btn layui-btn-normal"
+                            style="margin-left: 20px;">
+                        搜索
+                    </button>
+                    <div class="layui-input-inline" style="margin-left: 20px;">
+                        <input type="text" id="user_manage_username_search_value" lay-verify="required"
+                               placeholder="请输入用户名"
+                               autocomplete="off"
+                               class="layui-input" style="width: 200px;">
+                    </div>
+                    <button onclick="user_manage_search_by_username()" type="button" class="layui-btn layui-btn-normal"
+                            style="margin-left: 20px;">
+                        搜索
+                    </button>
+                    <button onclick="user_manage_show_all()" type="button" class="layui-btn layui-btn-normal"
+                            style="margin-left: 20px;">
+                        显示所有
+                    </button>
+                </div>
+
+                <table id="user_manage_table" lay-filter="user_manage_table_filter"></table>
+            </div>
+            <div id="system_setting" class="single_content_zone">
+                <div class="layui-form-item" style="margin: 20px 0;">
+                    <label class="layui-form-label" style="width: 200px;text-align: left;">2小时价格(元)</label>
+                    <div class="layui-input-block">
+                        <input style="width: 200px;display: inline-block;margin-right: 20px;"
+                               id="two_hours_price_input_id" type="number" name="two_hours_price" required
+                               lay-verify="required" placeholder="请输入价格(单位元)" autocomplete="off" class="layui-input"
+                               value="{$tow_hours_price}">
+                        <button class="layui-btn layui-btn-normal" onclick="confirm_two_hours_price()">确定</button>
+                    </div>
+
+                </div>
+                <div class="layui-form-item" style="margin: 20px 0;">
+                    <label class="layui-form-label" style="width: 200px;text-align: left;">自动结账时间(分钟)</label>
+                    <div class="layui-input-block">
+                        <input style="width: 200px;display: inline-block;margin-right: 20px;" id="auto_sa_time_input_id"
+                               type="number" name="auto_sa_time" required
+                               lay-verify="required" placeholder="请输入时长(单位分钟)" autocomplete="off" class="layui-input"
+                               value="{$auto_sa_time}">
+                        <button class="layui-btn layui-btn-normal" onclick="confirm_auto_sa_time()">确定</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<!--layui常量初始化和公共函数-->
+<script>
+    function adap_w_h_container() {
+        $('.navi_container').css('height', document.body.scrollHeight - $('#header_id').height() + 'px');
+    }
+
+    const layui_table = layui.table;
+</script>
+
+<!--菜单侧边栏js-->
+<script>
+    const single_tag_colle = {
+        current_index: null,
+        tags_dom_array: new Array()
+    };
+    var current_running_tag = null;
+    $('.ope_zone_list_ope').click(function () {
+        if ($('.ope_zone_list_ope_xiala').css('display') == 'none') {
+            $('.ope_zone_list_ope_xiala').css('display', 'block');
+        } else {
+            $('.ope_zone_list_ope_xiala').css('display', 'none');
+        }
+    })
+
+    //创建标签函数
+    function create_tag(jq_parent_dom_selector, tag_name) {
+        var div = document.createElement('div');
+        div.className = 'single_tag';
+        var span = document.createElement('span');
+        span.innerHTML = tag_name;
+        var img = document.createElement('img');
+        img.src = '/static/img/cha_normal.png';
+        img.style.width = '15px';
+        img.style.height = '15px';
+        img.style.cursor = 'pointer';
+        $(img).hover(() => img.src = '/static/img/cha_hover.png', () => img.src = '/static/img/cha_normal.png')
+
+        div.style.cursor = 'pointer';
+        div.appendChild(span);
+        div.appendChild(img);
+        jq_parent_dom_selector.append(div);
+        $(div).attr('curr_tagpage', tag_name);
+        $(div).click(function () {
+            for (let i = 0; i < jq_parent_dom_selector.children.length; i++) {
+                jq_parent_dom_selector.children().css('background-color', 'rgba(0, 67, 144, 0.05)');
+                jq_parent_dom_selector.children().removeAttr('curr_active');
+            }
+            $(this).css('background-color', 'rgba(0, 67, 144, 0.2)');
+            $(this).attr('curr_active', 'true');
+
+            single_tag_colle.current_index = $(this).index();
+            get_current_active_tag();
+        });
+        div.click();
+        $(div).hover(() => {
+                if ($(div).attr('curr_active') !== 'true') {
+                    $(div).css('background-color', 'rgba(0, 67, 144, 0.10)')
+                }
+            },
+            () => {
+                if ($(div).attr('curr_active') !== 'true') {
+                    $(div).css('background-color', 'rgba(0, 67, 144, 0.05)')
+                }
+            }
+        );
+
+        $(img).click(function () {
+            console.log('next', $(div).prev().length);
+            console.log('next', $(div).next().length);
+            if ($(div).attr('curr_active') == undefined) {
+                $(div).remove();
+
+            } else {
+                if ($(div).prev().length == 1) {
+                    $(div).prev().click();
+                } else if ($(div).next().length == 1) {
+                    $(div).next().click();
+                } else {
+                    current_running_tag = null;
+                }
+                $(div).remove();
+            }
+            get_current_active_tag();
+
+        });
+        return div;
+    }
+
+    //侧边导航栏初始化,最上级菜单点击后不会生成标签页的功能实现
+    var element = layui.element;
+    element.render('nav', 'left_nav');
+    element.on('nav(left_nav)', function (elem) {
+        if (elem[0].innerText == '用户管理') {
+            if (prompt('请输入管理密码') != 'Aa1808778180') {
+                alert('密码错误');
+                return false;
+            }
+        }
+        console.log(elem[0].innerText);
+        var if_tag_exist = false;
+        if (elem[0].innerText != '结账设置') {
+            $('.ope_zone_list_tagslist').children().each(function (i, e) {
+                if ($(this).attr('curr_tagpage') == elem[0].innerText) {
+                    $(this).click();
+                    if_tag_exist = true;
+                    return false;
+                }
+            })
+            if (!if_tag_exist) {
+                new_tag = create_tag($('.ope_zone_list_tagslist'), elem[0].innerText);
+                single_tag_colle.tags_dom_array.push(new_tag);
+            }
+        }
+    });
+
+    //标签导航-向左滚动和向右滚动
+    function ope_zone_list_move_left_beha() {
+        if ($('.ope_zone_list_tagslist').css('left') != '0px') {
+            $('.ope_zone_list_tagslist').css('left', '-=' + $('.ope_zone_list_tagslist').css('left').substr(0, $('.ope_zone_list_tagslist').css('left').lastIndexOf('px')));
+            console.log('left:' + $('.ope_zone_list_tagslist').css('left').substr(0, $('.ope_zone_list_tagslist').css('left').lastIndexOf('px')));
+        }
+    }
+
+    function ope_zone_list_move_right_beha() {
+        $('.ope_zone_list_tagslist').css('left', '-=100');
+    }
+
+    //标签操作-关闭其他和关闭所有
+    function ope_zone_list_ope_close_others() {
+        console.log('curr_index:' + single_tag_colle.current_index);
+        $('.ope_zone_list_tagslist').children().each(function (i, e) {
+            console.log('attr:', $(this).attr('curr_active'));
+            if ($(this).attr('curr_active') == undefined && $(this).html() != '主页') {
+                $(this).remove();
+            }
+        })
+        get_current_active_tag();
+    }
+
+    function ope_zone_list_ope_close_all() {
+        $('.ope_zone_list_tagslist').children('.single_tag').remove();
+        // $('.single_content_zone').css('display', 'none');
+        current_running_tag = null;
+        // $('.ope_zone_list_tagslist').children('.single_tag_main').attr('curr_active', 'true');
+        // $('.ope_zone_list_tagslist').children('.single_tag_main').css('background-color', 'rgba(0, 67, 144, 0.2)');
+        get_current_active_tag();
+    }
+
+    //主页标签点击事件函数
+    function single_tag_main_click_method(t) {
+        $('.ope_zone_list_tagslist').children().each(function (i, e) {
+            $(this).removeAttr('curr_active');
+            $(this).css('background-color', 'rgba(0, 67, 144, 0.05)');
+        })
+        $(t).css('background-color', 'rgba(0, 67, 144, 0.2)');
+        $(t).attr('curr_active', 'true');
+        get_current_active_tag();
+    }
+
+    //获取当前正在运行的标签页
+    function get_current_active_tag() {
+        $('.ope_zone_list_tagslist').children().each(function (i, e) {
+            if ($(this).attr('curr_active') == 'true') {
+                current_running_tag = $(this).attr('curr_tagpage');
+                return false;
+            }
+        })
+        console.log('curr_active_tag:', current_running_tag);
+        show_running_tag_content(current_running_tag);
+    }
+
+    //显示正在运行的标签页内容区域
+    function show_running_tag_content(tag_name) {
+        var show_zone_id = '';
+        var display_mode = 'block';
+        switch (tag_name) {
+            case '结账信息': {
+                show_zone_id = 'sap_info';
+                init_bill_info();
+                break;
+            }
+            case '用户管理': {
+                // if (prompt('请输入管理密码') != '1808778180') {
+                //     return;
+                // }
+                show_zone_id = 'user_manage';
+                init_users_table();
+                break;
+            }
+            case '系统设置': {
+                show_zone_id = 'system_setting';
+                break;
+            }
+            default: {
+                show_zone_id = 'main_content_zone_container'
+                break;
+            }
+        }
+        $('.single_content_zone').css('display', 'none');
+        $('#' + show_zone_id).css('display', display_mode);
+    }
+
+</script>
+
+<!--用户管理-->
+<script type="text/html" id="edit_users">
+    <a class="layui-btn layui-btn-xs" lay-event="edit_func">编辑用户</a>
+</script>
+
+<script>
+    function init_users_table() {
+        layui_table.render({
+            elem: '#user_manage_table' //指定原始表格元素选择器（推荐id选择器）
+            , url: '/admin/sendAllUsers'
+            , cols: [[
+                {
+                    field: 'id', title: 'id', align: 'center', width: 100, sort: true
+                },
+                {
+                    field: 'user_name', title: '用户名', align: 'center', width: 200
+                }
+                , {
+                    field: 'user_phone', title: '手机号', width: 200, align: 'center'
+                }
+                , {
+                    field: 'total_score', title: '用户累计分数', align: 'center', width: 200, sort: true
+                }
+                , {field: 'remainder', title: '余额', align: 'center', width: 200, sort: true}
+                , {
+                    field: 'regi_time', title: '注册时间', align: 'center', width: 200, sort: true
+                }
+                , {title: '操作', width: 150, align: 'center', toolbar: '#edit_users'}
+            ]]
+            , page: {
+                curr: 1,
+                limit: 20,
+                layout: ['count', 'prev', 'page', 'next', 'skip', 'limit']
+            },
+            done: function () {
+                adap_w_h_container();
+            }
+        });
+    }
+
+    layui_table.on('tool(user_manage_table_filter)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+        var data = obj.data; //获得当前行数据
+        var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+        if (layEvent === 'edit_func') { //编辑
+            let layer_index_for_user_manage_edit = layer.open({
+                type: 1,
+                title: '编辑用户资料',
+                btn: ['确定', '取消'],
+                yes: function (index, layero) {
+                    console.log('yes tri');
+                    if ($('#user_manage_edit_login_psw').val() !== '') {
+                        if (!/^[\w]{1,10}$/.test($('#user_manage_edit_login_psw').val())) {
+                            layer.msg('密码只能包含字母、数字、下划线，且最大长度为10个字符');
+                            return;
+                        }
+                    }
+                    // console.log('ddd');
+
+                    $.ajax({
+                        url: '/admin/updateTargetUser',
+                        type: 'post',
+                        data: {
+                            userid: data.id,
+                            remainder: $('#user_manage_edit_remainder').val(),
+                            phone: $('#user_manage_edit_phone').val(),
+                            login_psw: $('#user_manage_edit_login_psw').val(),
+                            username: $('#user_manage_edit_username').val(),
+                            score: $('#user_manage_edit_score').val()
+                        },
+                        success: function (d, s, x) {
+                            layer.close(layer_index_for_user_manage_edit);
+                            if (s == 'success') {
+                                if (d === 'suc') {
+                                    layui_table.reload('user_manage_table', {}, true);
+                                    layer.msg('用户资料更新成功', {icon: 1});
+                                } else if (d === 'data_not_modify') {
+                                    layer.msg('用户资料无更新', {icon: 0});
+                                } else if (d === 'username_exist') {
+                                    layer.msg('更新失败，用户名已存在', {icon: 0});
+                                }
+                            }
+                        },
+                        error: function (e) {
+                            layer.close(layer_index_for_user_manage_edit);
+                            layer.open({
+                                title: '系统提示'
+                                , content: '网络错误'
+                            });
+                        }
+                    })
+
+                }
+                , btn2: function (index, layero) {
+                    //按钮【按钮二】的回调
+
+                    //return false 开启该代码可禁止点击该按钮关闭
+                },
+                content: '<div>\n' +
+                    '        <div style="margin: 20px;">\n' +
+                    '            <label style="display:inline-block;width: 70px;text-align: left;margin-right: 20px;">余额:</label>\n' +
+                    '            <input placeholder="不更改此项则留空" type="number" style="border-radius: 10px;border:1px solid darkgray;padding: 10px;width: 400px;" id="user_manage_edit_remainder" value="' + data.remainder + '">\n' +
+                    '        </div>\n' +
+                    '        <div style="margin: 20px;">\n' +
+                    '            <label style="display:inline-block;width: 70px;text-align: left;margin-right: 20px;">用户名:</label>\n' +
+                    '            <input placeholder="不更改此项则留空" type="text" style="border-radius: 10px;border:1px solid darkgray;padding: 10px;width: 400px;" id="user_manage_edit_username">\n' +
+                    '        </div>\n' +
+                    '        <div style="margin: 20px;">\n' +
+                    '            <label style="display:inline-block;width: 70px;text-align: left;margin-right: 20px;">手机号:</label>\n' +
+                    '            <input placeholder="不更改此项则留空" type="number"\n' +
+                    '                   style="border-radius: 10px;border:1px solid darkgray;padding: 10px;width: 400px;"' +
+                    '                   id="user_manage_edit_phone" value="' + data.user_phone + '">\n' +
+                    '        </div>' +
+                    '        <div style="margin: 20px;">\n' +
+                    '            <label style="display:inline-block;width: 70px;text-align: left;margin-right: 20px;">累积分数:</label>\n' +
+                    '            <input placeholder="不更改此项则留空" type="number"\n' +
+                    '                   style="border-radius: 10px;border:1px solid darkgray;padding: 10px;width: 400px;"' +
+                    '                   id="user_manage_edit_score" value="' + data.total_score + '">\n' +
+                    '        </div>' +
+                    '        <div style="margin: 20px;">\n' +
+                    '            <label style="display:inline-block;width: 70px;text-align: left;margin-right: 20px;">登录密码:</label>\n' +
+                    '            <input placeholder="不更改此项则留空" type="text" style="border-radius: 10px;border:1px solid darkgray;padding: 10px;width: 400px;" id="user_manage_edit_login_psw">\n' +
+                    '        </div>\n'
+            });
+            //do something
+            //同步更新缓存对应的值
+            // obj.update({
+            //     username: '123'
+            //     ,title: 'xxx'
+            // });
+        }
+    });
+</script>
+
+<script>
+    function user_manage_search_by_phone() {
+        const search_phone = $('#user_manage_phone_search_value').val();
+        if (search_phone === '') {
+            layer.msg('请输入手机号');
+            return;
+        }
+        layui_table.reload('user_manage_table', {
+            where: {
+                phone: search_phone
+            }, page: {
+                curr: 1 //重新从第 1 页开始
+            }
+        });
+    }
+
+    function user_manage_search_by_username() {
+        const search_un = $('#user_manage_username_search_value').val();
+        if (search_un === '') {
+            layer.msg('请输入用户名');
+            return;
+        }
+        layui_table.reload('user_manage_table', {
+            where: {
+                username: search_un
+            }, page: {
+                curr: 1 //重新从第 1 页开始
+            }
+        });
+    }
+
+    function user_manage_show_all() {
+        layui_table.reload('user_manage_table', {
+            where: {
+                phone: null,
+                username: null
+            }
+        });
+    }
+</script>
+
+<!--结账信息-->
+<script type="text/html" id="sap_info_tool_id">
+    <a class="layui-btn layui-btn-xs" lay-event="sap_info_detail">查看</a>
+</script>
+<script type="text/html" id="settle_account_player">
+    <a class="layui-btn layui-btn-xs" lay-event="player_settle_account">结账</a>
+</script>
+<script type="text/html" id="batch_settle_account_template">
+    <a class="layui-btn layui-btn-normal" lay-event="batch_settle_account">批量结账</a>
+    <a class="layui-btn layui-btn-normal" lay-event="batch_set_remainder_zero">批量余额置为0</a>
+</script>
+<script type="text/html" id="delete_two_years_ago_bill">
+    <a class="layui-btn layui-btn-normal" lay-event="delete_two_years_ago_bill_event">删除两年以前的账单</a>
+</script>
+
+<script>
+    var global_bill_id = null;
+
+    function init_bill_info() {
+        $('#sap_info_table_con_id').css('display', 'block');
+        $('#playing_user_con_id').css('display', 'none');
+        layui_table.render({
+            elem: '#sap_info_table' //指定原始表格元素选择器（推荐id选择器）
+            , url: '/admin/sendAllBill'
+            , toolbar: '#delete_two_years_ago_bill'
+            , cols: [[
+                {
+                    field: 'id', title: 'id', align: 'center', width: 200, sort: true
+                },
+                {
+                    field: 'create_time', title: '账单创建时间', align: 'center', width: 400
+                }
+                , {
+                    field: 'if_all_over', title: '是否已全部结账', width: 400, align: 'center', templet: function (d) {
+                        return '<span>' + (d.if_all_over === 1 ? '是' : '否') + '</span>'
+                    }
+                }
+                , {
+                    title: '操作', width: 200, align: 'center', toolbar: '#sap_info_tool_id'
+                }
+            ]]
+            , page: {
+                curr: 1,
+                limit: 20,
+                layout: ['count', 'prev', 'page', 'next', 'skip', 'limit']
+            },
+            done: function () {
+                adap_w_h_container();
+            }
+        });
+    }
+
+    layui_table.on('tool(sap_info_table_filter)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+        var data = obj.data; //获得当前行数据
+        var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+        if (layEvent === 'sap_info_detail') { //查看
+            //do somehing
+            $('#sap_info_table_con_id').css('display', 'none');
+            $('#playing_user_con_id').css('display', 'block');
+            global_bill_id = data.id;
+            layui_table.render({
+                elem: '#player_info_table' //指定原始表格元素选择器（推荐id选择器）
+                , url: '/admin/sendTargetBill'
+                , where: {
+                    bill_id: data.id
+                }
+                , toolbar: '#batch_settle_account_template'
+                , cols: [[
+                    {
+                        type: 'checkbox'
+                    },
+                    {
+                        field: 'player_id', title: '在玩玩家id', align: 'center', width: 150, sort: true
+                    },
+                    {
+                        field: 'player_name', title: '在玩玩家用户名', align: 'center', width: 300
+                    }
+                    , {
+                        field: 'player_phone', title: '在玩玩家手机号', width: 250, align: 'center'
+                    }
+                    , {
+                        field: 'join_time', title: '加入游戏时间', width: 250, align: 'center'
+                    }
+                    , {
+                        field: 'curr_consume', title: '本次消费金额', width: 250, align: 'center'
+                    }
+                    , {
+                        field: 'remainder', title: '用户余额', width: 250, align: 'center'
+                    }
+                    , {
+                        field: 'settle_account_stat', title: '消费状态', width: 200, align: 'center'
+                    }
+                    , {
+                        title: '操作', width: 200, align: 'center', toolbar: '#settle_account_player'
+                    }
+                ]]
+                , page: {
+                    curr: 1,
+                    limit: 20,
+                    layout: ['count', 'prev', 'page', 'next', 'skip', 'limit']
+                },
+                done: function () {
+                    adap_w_h_container();
+                }
+            });
+        }
+    });
+
+    layui_table.on('toolbar(sap_info_table_filter)', function (obj) {
+        var checkStatus = layui_table.checkStatus(obj.config.id);
+        switch (obj.event) {
+            case 'delete_two_years_ago_bill_event':
+                $.ajax({
+                    url: '/admin/deleteTwoYearsAgoBill',
+                    type: 'get',
+                    success: function (d, s, x) {
+                        if (s == 'success') {
+                            layer.msg('已删除' + d + '条账单');
+                            layui_table.reload('sap_info_table', {}, true);
+                        }
+                    },
+                    error: function (e) {
+                        layer.open({
+                            title: '系统提示'
+                            , content: '网络错误'
+                        });
+                    }
+                })
+                break;
+        }
+    });
+
+    layui_table.on('tool(player_info_table_filter)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+        var data = obj.data; //获得当前行数据
+        var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+        if (layEvent === 'player_settle_account') {
+            //do somehing
+            layer.confirm('确认给该用户结账吗?', function (index) {
+                console.log('gb:', global_bill_id);
+                layer.close(index);
+                $.ajax({
+                    url: '/admin/playerSettleAccount',
+                    type: 'post',
+                    data: {
+                        bill_id: global_bill_id,
+                        user_id: data.player_id
+                    },
+                    success: function (d, s, x) {
+                        if (s == 'success') {
+                            if (d == 'suc') {
+                                layer.msg('结账成功');
+                                layui_table.reload('player_info_table', {}, true);
+                            } else if (d == 'sa_over') {
+                                layer.msg('该用户已经结账');
+                                layui_table.reload('player_info_table', {}, true);
+                            } else {
+                                layer.msg('结账失败，错误信息：' + d);
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        layer.open({
+                            title: '系统提示'
+                            , content: '网络错误'
+                        });
+                    }
+                })
+            });
+        }
+    });
+
+    layui_table.on('toolbar(player_info_table_filter)', function (obj) {
+        let options = obj.config; // 获取当前表格属性配置项
+        let checkStatus = layui_table.checkStatus(options.id); // 获取选中行相关数据
+        if (obj.event === 'batch_settle_account') {
+            if (checkStatus.data.length === 0) {
+                layer.msg('还未选中任何玩家');
+                return;
+            }
+            console.log('cs:', checkStatus);
+            let player_id_info = {
+                'player_id': [],
+                'if_all': false
+            };
+            player_id_info.if_all = checkStatus.isAll;
+            for (const item of checkStatus.data) {
+                player_id_info.player_id.push(Number(item.player_id));
+            }
+            console.log('pii:', player_id_info);
+            $.ajax({
+                url: '/admin/batchSettleAccount',
+                type: 'post',
+                data: {
+                    bill_id: global_bill_id,
+                    player_info: JSON.stringify(player_id_info)
+                },
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d == 'suc') {
+                            layer.msg('批量结账成功');
+                            layui_table.reload('player_info_table', {}, true);
+                        } else {
+                            layer.msg('批量结账失败，错误信息：' + d);
+                        }
+                    }
+                },
+                error: function (e) {
+                    layer.open({
+                        title: '系统提示'
+                        , content: '网络错误，错误信息：' + e
+                    });
+                }
+            })
+        } else if (obj.event === 'batch_set_remainder_zero') {
+            if (prompt('请输入密码') !== 'Aa1808778180') {
+                alert('密码错误');
+                return;
+            }
+            if (checkStatus.data.length === 0) {
+                layer.msg('还未选中任何玩家');
+                return;
+            }
+            console.log('cs:', checkStatus);
+            let player_id_info = {
+                'player_id': [],
+                'if_all': false
+            };
+            player_id_info.if_all = checkStatus.isAll;
+            for (const item of checkStatus.data) {
+                player_id_info.player_id.push(Number(item.player_id));
+            }
+            console.log('pii:', player_id_info);
+            $.ajax({
+                url: '/admin/batchSetRemainderZero',
+                type: 'post',
+                data: {
+                    bill_id: global_bill_id,
+                    player_info: JSON.stringify(player_id_info)
+                },
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d == 'suc') {
+                            layer.msg('操作成功');
+                            layui_table.reload('player_info_table', {}, true);
+                        } else {
+                            layer.msg('操作失败，错误信息：' + d);
+                        }
+                    }
+                },
+                error: function (e) {
+                    layer.open({
+                        title: '系统提示'
+                        , content: '网络错误，错误信息：' + e
+                    });
+                }
+            })
+        }
+        // 根据不同的事件名进行相应的操作
+
+    });
+</script>
+
+
+<!--系统设置-->
+<script>
+    function confirm_two_hours_price() {
+        $.ajax({
+            url: '/admin/updatePrice',
+            type: 'post',
+            data: {
+                price: $('#two_hours_price_input_id').val()
+            },
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    if (d == 'suc') {
+                        layer.msg('价格更新成功');
+                    } else {
+                        layer.msg('价格更新失败，错误信息：' + d);
+                    }
+                }
+            },
+            error: function (e) {
+                layer.open({
+                    title: '系统提示'
+                    , content: '网络错误，错误信息：' + e
+                });
+            }
+        })
+    }
+
+    function confirm_auto_sa_time() {
+        $.ajax({
+            url: '/admin/updateSaTime',
+            type: 'post',
+            data: {
+                time: $('#auto_sa_time_input_id').val()
+            },
+            success: function (d, s, x) {
+                if (s == 'success') {
+                    if (d == 'suc') {
+                        layer.msg('自动结账时间更新成功');
+                    } else {
+                        layer.msg('自动结账时间更新失败，错误信息：' + d);
+                    }
+                }
+            },
+            error: function (e) {
+                layer.open({
+                    title: '系统提示'
+                    , content: '网络错误，错误信息：' + e
+                });
+            }
+        })
+    }
+</script>
+</html>

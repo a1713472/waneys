@@ -1,0 +1,5089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>游戏页</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #F5A623;
+            --danger-color: #D0021B;
+            --success-color: #7ED321;
+            --background-color: #F8F9FA;
+            --text-color: #2C3E50;
+            --border-radius: 12px;
+            --identity_img_width: 120px;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+            font-size: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: transparent;
+        }
+
+        body {
+            position: fixed;
+            background: transparent;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;  /* body保持hidden */
+        }
+
+        ul {
+            list-style: none;
+        }
+
+
+        #fix_tab {
+            height: 150px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            padding: 0;
+        }
+
+        .fix_tab_ul {
+            width: 60%;  /* 减小宽度，使按钮更紧凑 */
+            height: 100%;
+            display: flex;
+            justify-content: space-between;  /* 使用space-between布局 */
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+        }
+
+        .fix_tab_li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            background: transparent;
+            width: 120px;  /* 保持按钮宽度 */
+            height: 120px;  /* 保持按钮高度 */
+            position: relative;
+        }
+
+        .fix_tab_li .nav-btn {
+            width: 100px;  /* 保持图标尺寸 */
+            height: 100px;  /* 保持图标尺寸 */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .fix_tab_li p {
+            display: block !important;  /* 强制显示文字 */
+            color: #FFE4B5;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            position: absolute;  /* 绝对定位 */
+            bottom: 0;  /* 固定在底部 */
+            width: 100%;  /* 宽度100% */
+            background: transparent !important;  /* 确保背景透明 */
+        }
+
+        .fix_tab_li.active {
+            transform: scale(1.1);
+        }
+
+        .fix_tab_li.active p {
+            color: #F5A623;
+            font-weight: bold;
+        }
+
+        /* 添加按钮悬停效果 */
+        .fix_tab_li:hover {
+            transform: scale(1.1);
+            transition: transform 0.3s ease;
+        }
+
+        .vote_button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .vote_button:active {
+            transform: scale(0.98);
+        }
+
+        .vote_button_disable {
+            background: #BDBDBD;
+            cursor: not-allowed;
+        }
+
+        #main_content_con_id {
+            position: relative;
+            z-index: 1;
+            height: 100vh;
+            width: 100%;
+            background: transparent;
+            padding: 0;
+        }
+
+        @media screen and (max-height: 750px) {
+            #main_content_con_id {
+                height: 100vh;
+            }
+        }
+
+        .main_content {
+            display: none;
+            height: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: auto;
+            background: transparent;
+        }
+
+        .main_content:nth-child(2) {
+            display: none;
+        }
+
+        .vote_ul_con {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-flow: column;
+            padding-top: 300px;  /* 从200px增加到300px */
+        }
+
+        .vote_ul {
+            width: 100vw;
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: flex-start;
+            align-items: center;
+            margin-top: 80px;
+            font-size: 24px;  /* 增加字体大小 */
+            color: #FFE4B5;  /* 设置文字颜色 */
+        }
+
+        .vote_label {
+            margin-right: 20px;
+        }
+
+        .vote_inner_li {
+            width: 50%;
+            box-sizing: border-box;
+            margin: 40px 0;
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            position: relative;
+        }
+
+        .vote_checkbox {
+            width: 40px;
+            height: 40px;
+            border: 1px solid deepskyblue;
+            margin-left: 20px;
+        }
+
+
+        .vote_button {
+            padding: 20px 80px;
+            font-size: 35px;
+            border: none;
+            border-radius: 10px;
+            margin-top: 150px;
+        }
+
+        .vote_button_disable {
+            background-color: darkgray;
+            color: white;
+
+        }
+
+        .vote_button_active {
+            background-color: deepskyblue;
+            color: white;
+        }
+
+        #identity_show_con_id {
+            display: flex;
+            flex-flow: column nowrap;
+            width: 100%;
+            height: 100vh;
+            align-items: center;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/static/img/game_bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .game-info-card {
+            background: url('/static/img/card_bg.jpg') no-repeat center;
+            background-size: cover;
+            width: 90%;
+            max-width: 800px;
+            margin: 20vh auto 0;
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-info-title {
+            color: #FFE4B5;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: left;
+            margin: 10px 0 50px 0;
+            padding-left: 20px;
+            background: linear-gradient(180deg, #E8B882 0%, #CF9E6F 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .game-info-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            padding: 20px;
+            min-height: 600px;
+        }
+
+        /* 第一行：号码身份阵营 */
+        .info-row:first-child {
+            position: absolute;
+            top: 80px;  /* 从100px改为80px，向上移动 */
+            left: 100px;  /* 保持向右的位置不变 */
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-row:first-child span {
+            font-size: 32px;
+        }
+
+        .info-row:first-child .number-bg:last-child {
+            margin-left: 30px !important;  /* 增加最后一个数字的左边距 */
+        }
+
+        .number-bg {
+            width: 45px;  /* 从40px增加到45px */
+            height: 45px;  /* 从40px增加到45px */
+            background: url('/static/img/number_bg.png') no-repeat center;
+            background-size: contain;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin: 0 15px;
+            font-size: 22px;  /* 从20px增加到22px，使数字也相应变大 */
+            font-weight: bold;
+        }
+
+        /* 第二行：队友信息 */
+        .info-row.brown {
+            position: absolute;
+            top: 200px;
+            left: -30px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .info-row.brown p {
+            font-size: 28px;
+            color: #FFE4B5;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 15px;
+            margin-left: 50px;
+            font-weight: bold;
+        }
+
+        .info-row.brown span {
+            font-size: 28px;
+            color: #FFE4B5;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+            margin-left: 50px;
+        }
+
+        /* 第三行：技能说明 */
+        .info-row.orange {
+            position: absolute;
+            top: 300px;
+            left: -20px;
+            font-size: 18px;
+            padding: 15px 20px;
+            background: rgba(255, 228, 181, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            width: calc(100% - 40px);
+        }
+
+        .info-row.orange span {
+            color: #FFE4B5;
+            margin-left: 10px;
+        }
+
+        .identity-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 10px;
+            object-fit: contain;
+        }
+
+        .info-row span {
+            font-size: inherit;  /* 继承父元素的字体大小 */
+            color: inherit;
+        }
+
+        .info-row:first-child span {
+            font-size: 32px;  /* 第一行的文字也放大 */
+        }
+
+        .info-row:first-child .number-bg:last-child {
+            margin-left: 20px !important;  /* 阵营数字向左移动 */
+        }
+
+        .skill-button {
+            position: absolute;
+            right: 20px;
+            top: -5px;  /* 从10px改为-5px，使按钮更靠上 */
+            width: 130px;  /* 从120px增加到130px */
+            height: 55px;  /* 从50px增加到55px */
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .skill-button:hover {
+            transform: scale(1.1);
+        }
+
+        .identity_img_con {
+            width: calc(var(--identity_img_width) * 2);
+            height: calc(var(--identity_img_width) * 2);
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            position: relative;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+        }
+
+        .game_identity_hint {
+            color: #FFE4B5;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+            background: linear-gradient(180deg, #E8B882 0%, #CF9E6F 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .teammate {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+
+        .teammate_hint {
+            color: #FFE4B5;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        #teammate_ul_id {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .teammate_item {
+            background: url('/static/img/number_bg.png') no-repeat center center;
+            background-size: contain;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            margin: 10px 0;
+            color: #FFE4B5;
+        }
+
+        .e_mn_score {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            padding: 15px 30px;
+            border-radius: 15px;
+            color: #FFE4B5;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .game_id_div {
+            color: #FFE4B5;
+            font-size: 20px;
+            margin: 15px 0;
+        }
+
+        .identity_img {
+            position: relative;
+            width: var(--identity_img_width);
+            object-fit: contain;
+            z-index: 5;
+        }
+
+        .anim_circle {
+            position: absolute;
+            z-index: 4;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            border-radius: 50%;
+            animation-name: anim_circle;
+            animation-fill-mode: both;
+            animation-iteration-count: infinite;
+            animation-duration: 1800ms;
+        }
+
+        @keyframes anim_circle {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        @-moz-keyframes anim_circle {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        @-o-keyframes anim_circle {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        #winner_score_ul {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100vw;
+            margin: 50px 0;
+        }
+
+        #winner_score_ul li {
+            margin: 40px 0;
+        }
+
+        #start_anim_dom_id {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(40, 40, 40, 0.8);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .start_anim_item {
+            font-size: 70px;
+            color: white;
+        }
+
+        .start_anim_class {
+            animation-name: anim_start_name;
+            animation-duration: 3s;
+            animation-fill-mode: both;
+            animation-iteration-count: 1;
+        }
+
+        .close_start_anim {
+            position: absolute;
+            top: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 90px;
+        }
+
+        @keyframes anim_start_name {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) rotate(0deg);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.3) rotate(360deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.3) rotate(720deg);
+            }
+        }
+
+        @-moz-keyframes anim_start_name {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) rotate(0deg);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.3) rotate(360deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.3) rotate(720deg);
+            }
+        }
+
+        @-o-keyframes anim_start_name {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) rotate(0deg);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.3) rotate(360deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.3) rotate(720deg);
+            }
+        }
+
+        #mask_identity_select_con_id {
+            display: none;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            background-color: black;
+            opacity: 0.7;
+
+        }
+
+        #mask_identity_select_main_id {
+            display: none;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 11;
+            flex-flow: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+        }
+
+        #mask_identity_select {
+            font-size: inherit;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid darkgray;
+        }
+
+        .ranking_ul {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+            padding: 0 20px;
+            margin-top: 20px;
+            box-sizing: border-box;
+            position: relative;
+            height: 100vh;
+            overflow: visible;  /* 添加overflow: visible */
+        }
+
+        .ranking_item_li {
+            border-radius: 15px;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            min-height: 150px;
+        }
+
+        .ranking_item_li.top-1,
+        .ranking_item_li.top-2,
+        .ranking_item_li.top-3 {
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .ranking_item_avatar {
+            width: 50px;  /* 调整头像大小 */
+            height: 50px;
+            border-radius: 50%;
+            background: none;  /* 移除背景色 */
+            margin: 0 10px;
+            overflow: hidden;  /* 确保图片在圆形内 */
+        }
+
+        .ranking_item_avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;  /* 确保图片填充整个区域 */
+        }
+
+        /* 为前三名设置特殊的头像大小 */
+        .ranking_item_li.top-1 .ranking_item_avatar,
+        .ranking_item_li.top-2 .ranking_item_avatar,
+        .ranking_item_li.top-3 .ranking_item_avatar {
+            width: 70px;
+            height: 70px;
+            border: 2px solid #FFE4B5;  /* 添加金色边框 */
+        }
+
+        .ranking_item_name {
+            font-size: 20px;
+            color: #FFE4B5;
+            text-align: center;
+            margin: 0;
+            flex: 1;
+            padding: 0 5px;
+            white-space: nowrap;
+        }
+
+        .ranking_item_score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #F5A623;
+            margin-left: 5px;
+            min-width: 70px;
+            text-align: right;
+            white-space: nowrap;  /* 防止文字换行 */
+        }
+
+        .e_mn_score {
+            padding: 20px 40px;
+            display: inline-block;
+            border: 1px solid darkgray;
+            border-radius: 10px;
+        }
+
+        .reset_kill_number {
+            background-color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 25px;
+            margin-bottom: 50px;
+            position: relative;
+            z-index: 999;
+        }
+
+        .confirm_kill_number {
+            background-color: deepskyblue;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-size: 25px;
+            margin-top: 50px;
+            position: relative;
+            z-index: 999;
+        }
+
+        #person_bill_page_con {
+            width: 100%;
+        }
+
+        #person_bill_page_con_ul {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: center;
+            align-items: center;
+            margin: 30px auto;
+            width: 90%;
+        }
+
+        #person_bill_table_id {
+            width: 90%;
+            border-collapse: collapse;
+            border: 1px solid darkgray;
+            margin: 30px auto;
+        }
+
+        #person_bill_table_id th, #person_bill_table_id td {
+            padding: 10px;
+        }
+
+        .bill_page_con_inner_li_hover {
+            width: 60px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: deepskyblue;
+            color: white;
+            border: 1px solid deepskyblue;
+            border-radius: 5px;
+            margin: 10px 20px;
+        }
+
+        .bill_page_con_inner_li {
+            width: 60px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            color: deepskyblue;
+            border: 1px solid deepskyblue;
+            border-radius: 5px;
+            margin: 10px 20px;
+        }
+
+        #mask_bill1 {
+            display: none;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            filter: blur(10px);
+            z-index: 9999;
+        }
+
+        #mask_bill2 {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background-color: white;
+            z-index: 10000;
+            border-radius: 10px;
+
+        }
+
+
+        #bill_detail {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-evenly;
+            flex-flow: column;
+            align-items: center;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: transparent;
+            padding: 10px 20px;
+            box-shadow: none;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item .nav-btn {
+            width: 120px;
+            height: 40px;
+            border: none;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item.active .nav-btn {
+            transform: scale(1.05);
+        }
+
+        .nav-item:nth-child(3) .nav-btn {
+            background-image: url('/static/img/排行榜.png');
+        }
+
+        .nav-item:nth-child(3).active .nav-btn {
+            background-image: url('/static/img/排行榜_active.png');
+        }
+
+        .nav-item:nth-child(4) .nav-btn {
+            background-image: url('/static/img/我的.png');
+        }
+
+        .nav-item:nth-child(4).active .nav-btn {
+            background-image: url('/static/img/我的_active.png');
+        }
+
+        .nav-text {
+            font-size: 14px;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active .nav-text {
+            color: #F5A623;
+        }
+
+        .nav-item:hover .nav-btn {
+            transform: scale(1.05);
+        }
+
+        .nav-item:hover .nav-text {
+            color: #F5A623;
+        }
+
+        .main_content.ranking-page {
+            background: url('/static/img/ranking_bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            height: 100vh;
+            padding: 0;
+            overflow: visible;  /* 改为visible */
+            touch-action: none;
+            user-select: none;
+        }
+
+        .ranking-content {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            overflow: visible;  /* 改为visible */
+            height: 100vh;
+            position: relative;
+        }
+
+        .ranking_item_li.other-rank {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            justify-content: flex-start;
+            min-height: auto;
+            padding: 0;
+            margin: 0 auto;
+            background: url('/static/img/other.png') no-repeat center center;
+            background-size: 100% 100%;
+            border-radius: 50px;
+            width: 500px;  /* 恢复到500px */
+            position: absolute;
+            transform: scale(0.85);
+            height: 55px;
+            display: flex;
+            align-items: center;
+            overflow: visible;
+        }
+
+        .ranking_item_li.top-1 {
+            position: absolute;
+            bottom: 170px;
+            left: -80px;  /* 向左移动 */
+            transform: scale(1.2);
+            z-index: 2;
+            overflow: visible;
+        }
+
+        .ranking_item_li.top-2 {
+            position: absolute;
+            bottom: 360px;  /* 向下移动 */
+            left: 32%;  /* 向左移动 */
+            transform: scale(1.1);
+        }
+
+        .ranking_item_li.top-3 {
+            position: absolute;
+            bottom: 140px;
+            left: 34%;
+            transform: scale(1);
+        }
+
+        /* 添加悬停效果 */
+        .ranking_item_li.top-1:hover,
+        .ranking_item_li.top-2:hover,
+        .ranking_item_li.top-3:hover {
+            transform: scale(1.3);
+            transition: transform 0.3s ease;
+            z-index: 3;
+        }
+
+        /* 确保内容不被裁剪 */
+        .ranking_item_li {
+            overflow: visible;
+        }
+
+        /* 为每个排名项设置具体位置，整体向下移动 */
+        .ranking_item_li.other-rank:nth-child(4) { top: 150px; left: 400px; }
+        .ranking_item_li.other-rank:nth-child(5) { top: 210px; left: 400px; }
+        .ranking_item_li.other-rank:nth-child(6) { top: 270px; left: 400px; }
+        .ranking_item_li.other-rank:nth-child(7) { top: 330px; left: 400px; }
+        .ranking_item_li.other-rank:nth-child(8) { top: 390px; left: 400px; }
+        .ranking_item_li.other-rank:nth-child(9) { top: 450px; left: 400px; }
+        .ranking_item_li.other-rank:nth-child(10) { top: 510px; left: 400px; }
+
+        .ranking_item_position {
+            font-size: 24px;
+            font-weight: bold;
+            color: #F5A623;
+            display: flex;
+            align-items: center;
+            min-width: 30px;
+            padding-left: 25px;  /* 减小左内边距 */
+            white-space: nowrap;
+        }
+
+        .ranking_item_name {
+            font-size: 20px;
+            color: #FFE4B5;
+            text-align: left;
+            margin: 0;
+            flex: 1;
+            padding: 0 5px;
+            padding-left: 55px;  /* 增加左内边距，让文字更靠右 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .ranking_item_li.top-1 .ranking_item_avatar,
+        .ranking_item_li.top-2 .ranking_item_avatar,
+        .ranking_item_li.top-3 .ranking_item_avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #FFE4B5;
+            margin: 5px 10px;  /* 调整margin */
+        }
+
+        .ranking_item_li.top-1 .ranking_item_name,
+        .ranking_item_li.top-2 .ranking_item_name,
+        .ranking_item_li.top-3 .ranking_item_name {
+            font-size: 26px;
+            color: #FFE4B5;
+            text-align: center;
+            margin: 5px 0;
+            padding: 0 10px;  /* 增加padding */
+            white-space: nowrap;
+            max-width: 200px;  /* 限制最大宽度 */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ranking_item_li.top-1 .ranking_item_score,
+        .ranking_item_li.top-2 .ranking_item_score,
+        .ranking_item_li.top-3 .ranking_item_score {
+            font-size: 28px;
+            font-weight: bold;
+            color: #F5A623;
+            margin-top: 5px;
+        }
+
+        .main_content:first-child {
+            background: url('/static/img/投票-背景图.png') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            height: 100vh;
+            padding: 0;
+            overflow: visible;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .main_content.vote-page {
+            background: url('/static/img/投票-背景图.png') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            height: 100vh;
+            padding: 0;
+            overflow: visible;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .vote-page-new {
+            background: url('/static/img/投票-背景图.png') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            height: 100vh;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .vote-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            position: relative;  /* 添加相对定位 */
+        }
+
+        .vote-card {
+            background: url('/static/img/1.png') no-repeat center center;
+            background-size: contain;
+            width: 180px;
+            height: 240px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            position: relative;  /* 添加相对定位 */
+            z-index: 1;  /* 添加基础层级 */
+        }
+
+        .vote-card.selected {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+            z-index: 2;  /* 选中时提升层级 */
+        }
+
+        .vote-card:hover {
+            transform: scale(1.05);
+            z-index: 3;  /* 悬停时提升层级 */
+        }
+
+        .player-number {
+            font-size: 28px;
+            color: #FFE4B5;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .vote-buttons {
+            position: fixed;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+            z-index: 4;  /* 确保按钮始终在最上层 */
+        }
+
+        .vote-submit {
+            background: url('/static/img/提交投票.png') no-repeat center center;
+            background-size: contain;
+            width: 180px;
+            height: 60px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .vote-skip {
+            background: url('/static/img/跳过.png') no-repeat center center;
+            background-size: contain;
+            width: 180px;
+            height: 60px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .vote-submit:hover, .vote-skip:hover {
+            transform: scale(1.1);
+        }
+
+        .vote-submit, .vote-skip {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .vote-submit {
+            background: #F5A623;
+            color: white;
+        }
+
+        .vote-skip {
+            background: rgba(255, 255, 255, 0.2);
+            color: #FFE4B5;
+        }
+
+        .vote-submit:hover, .vote-skip:hover {
+            transform: scale(1.05);
+        }
+
+        /* 队友显示样式 */
+        .teammate-container {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .teammate-title {
+            color: #FFE4B5;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        #teammate_ul_id {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .teammate_item {
+            color: #fff;
+            font-size: 18px;
+            margin: 5px 0;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .skill-button {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .skill-button:hover {
+            transform: scale(1.1);
+        }
+
+        .user-info-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/img/背景-我的.png') no-repeat center center fixed;
+            background-size: cover;
+            z-index: 999;  /* 降低z-index，确保不会遮挡底部导航 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-info-container {
+            width: 90%;
+            max-width: 800px;
+            background: transparent;
+            border-radius: 20px;
+            padding: 30px;
+            color: #FFE4B5;
+            position: relative;  /* 添加相对定位 */
+        }
+
+        .user-header {
+            display: flex;
+            flex-direction: column;  /* 改为纵向排列 */
+            align-items: flex-start;  /* 左对齐 */
+            margin-bottom: 50px;  /* 增加底部间距 */
+            position: relative;  /* 添加相对定位 */
+        }
+
+        .user-avatar {
+            width: 120px;  /* 增大头像尺寸 */
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #FFE4B5;
+            position: absolute;  /* 绝对定位 */
+            right: 0;  /* 靠右 */
+            top: -20px;  /* 向上移动 */
+        }
+
+        .user-basic-info {
+            margin-top: 180px;  /* 增加顶部间距，让整体向下移动 */
+            width: 100%;
+            padding-left: 30px;  /* 添加左边距，让用户名向左移动 */
+        }
+
+        .user-name {
+            font-size: 42px;
+            margin-bottom: 50px;  /* 增加与手机号的间距 */
+            cursor: pointer;
+            color: #FFE4B5;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-name span {
+            font-size: 42px;
+        }
+
+        .user-phone {
+            font-size: 28px;  /* 放大手机号字体 */
+            color: rgba(255, 228, 181, 0.8);
+            margin-top: 20px;  /* 增加与用户名的间距 */
+        }
+
+        .account-balance {
+            background: transparent;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: left;  /* 改为左对齐 */
+            position: absolute;  /* 使用绝对定位 */
+            top: 20px;  /* 向上移动 */
+            left: 30px;  /* 向左移动 */
+        }
+
+        .balance-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #F5A623;
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            color: #F5A623;
+        }
+
+        /* 添加用户名编辑样式 */
+        .user-name-edit {
+            display: none;
+            margin-top: -30px;
+            margin-bottom: 30px;
+        }
+
+        .user-name-edit input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #FFE4B5;
+            border-radius: 5px;
+            padding: 8px 15px;
+            color: #FFE4B5;
+            font-size: 24px;
+            width: 200px;
+        }
+
+        .user-name-edit button {
+            background: #F5A623;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            color: white;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .user-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: #F5A623;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            background: #ff9900;
+        }
+
+        .ranking-list {
+            width: 100%;
+            padding: 10px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;  /* 减小内边距 */
+            margin-bottom: 8px;  /* 减小项目之间的间距 */
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .ranking-avatar {
+            width: 50px;  /* 稍微减小头像尺寸 */
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;  /* 减小头像与用户名之间的间距 */
+            border: 2px solid #FFE4B5;
+        }
+
+        .ranking-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-left: 5px;  /* 减小左边距 */
+        }
+
+        .ranking-name {
+            color: #FFE4B5;
+            font-size: 18px;
+            margin-right: 15px;  /* 减小用户名与积分之间的间距 */
+        }
+
+        .ranking-score {
+            color: #F5A623;
+            font-size: 20px;
+            font-weight: bold;
+            margin-left: auto;  /* 将积分推到右边 */
+            padding-right: 10px;  /* 添加一些右边距 */
+        }
+
+        .ranking-number {
+            width: 24px;  /* 固定宽度 */
+            color: #FFE4B5;
+            font-size: 16px;
+            margin-right: 10px;  /* 减小序号与头像之间的间距 */
+            text-align: center;
+        }
+
+        /* 身份面板样式 */
+        .identity-panel {
+            background: rgba(14, 26, 43, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            color: #fff;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .identity-header {
+            border-bottom: 2px solid #4A90E2;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .identity-header h2 {
+            color: #4A90E2;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        .identity-camp {
+            font-size: 18px;
+            color: #FFE4B5;
+        }
+
+        .identity-content {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .identity-avatar {
+            flex-shrink: 0;
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid #4A90E2;
+        }
+
+        .identity-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .identity-info {
+            flex-grow: 1;
+        }
+
+        .identity-name {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #FFE4B5;
+        }
+
+        .identity-description {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #D3D3D3;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .identity-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .identity-avatar {
+                margin: 0 auto;
+            }
+
+            .identity-info {
+                margin-top: 15px;
+            }
+        }
+
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #FFE4B5;
+            margin-right: 30px;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 移除头像编辑相关样式 */
+        .avatar-edit-hint {
+            display: none;
+        }
+
+        /* 其他样式保持不变... */
+
+        /* 添加用户信息栏样式 */
+        .user-stats {
+            position: fixed;
+            top: 20px;
+            right: 120px; /* 为每日按钮留出空间 */
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: #FFE4B5;
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .stat-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .level-badge {
+            background: linear-gradient(135deg, #F5A623, #F7B946);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .daily-btn {
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .daily-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
+        }
+
+        /* 每日按钮样式 */
+        .daily-panel-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .daily-panel-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+        }
+        
+        .daily-panel-btn img {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .daily-panel-btn span {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* 投票信息按钮样式 */
+        .vote-info-btn {
+            position: fixed;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .vote-info-btn:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        /* 投票信息面板样式 */
+        .vote-info-panel {
+            display: none;
+            position: fixed;
+            bottom: 240px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 999;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+            width: 300px;
+            color: #FFE4B5;
+        }
+
+        .vote-info-panel.show {
+            display: block;
+        }
+
+        /* 用户信息部分样式 */
+        .user-info-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 228, 181, 0.2);
+        }
+
+        .user-stat-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .user-stat-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .level-badge {
+            background: #4A90E2;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        /* 投票信息部分样式 */
+        .vote-info-section {
+            margin-top: 15px;
+        }
+
+        .vote-info-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #F5A623;
+        }
+
+        /* 投票容器样式 */
+        .vote-con {
+            position: relative;
+        }
+
+        /* 投票信息内容样式 */
+        #vote-count-list, #vote-out-list {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        #vote-count-list div, #vote-out-list div {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid rgba(255, 228, 181, 0.1);
+        }
+
+        #vote-count-list div:last-child, #vote-out-list div:last-child {
+            border-bottom: none;
+        }
+
+        /* 投票数量显示样式 */
+        .vote-count {
+            color: #4A90E2;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        /* 出局玩家显示样式 */
+        .out-player {
+            color: #FF6B6B;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 用户信息栏 -->
+    <div class="user-stats">
+        <div class="stat-item">
+            <span class="level-badge">Lv.<span id="userLevel">1</span></span>
+        </div>
+        <div class="stat-item">
+            <img src="/static/img/coin.png" class="stat-icon" alt="金币">
+            <span id="userCoins">0</span>
+        </div>
+        <div class="stat-item">
+            <img src="/static/img/silver.png" class="stat-icon" alt="银币">
+            <span id="userSilver">0</span>
+        </div>
+    </div>
+
+    <!-- 每日签到按钮 -->
+    <button class="daily-panel-btn" onclick="window.location.href='/index/dailyPanel'">
+        <img src="/static/img/daily.png" alt="每日">
+        <span>每日签到</span>
+    </button>
+
+    <div id="main_content_con_id">
+        <!-- 投票信息面板 -->
+        <div class="vote-con">
+            <button class="vote-info-btn" onclick="toggleVoteInfo()">
+                查看投票情况
+            </button>
+
+            <div class="vote-info-panel" id="vote-info-panel">
+                <div class="vote-info-section">
+                    <div class="vote-info-title">本轮投票情况</div>
+                    <div id="vote-count-list"></div>
+                </div>
+                <div class="vote-info-section">
+                    <div class="vote-info-title">出局玩家</div>
+                    <div id="vote-out-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 投票页面 -->
+        <div class="main_content vote-page">
+            <div class="vote_ul_con" id="vote_ul_con_id">
+                <ul class="vote_ul" id="vote_ul_id"></ul>
+            </div>
+        </div>
+        
+        <!-- 身份页面 -->
+        <div class="main_content">
+            <div id="identity_show_con_id">
+                <div class="game-info-card">
+                    <img src="/static/img/发动技能.png" class="skill-button" id="skillButton">
+                    <div class="game-info-content">
+                        <div class="info-row">
+                            <span>号码：</span>
+                            <div class="number-bg">{$number}</div>
+                            <span>身份：</span>
+                            <img src="/static/identity_img/{$identity}.png" class="identity-icon">
+                            <span>{$identity}</span>
+                            <div class="number-bg" style="margin-left: auto;">{$group}</div>
+                        </div>
+
+                        <div class="info-row brown">
+                            {if condition="$group eq '鸭'"}
+                                <p>队友：
+                                    {foreach $teammate as $key=>$item}
+                                        {$item['game_id']}号玩家{if condition="$key lt count($teammate)-1"}, {/if}
+                                    {/foreach}
+                                </p>
+                            {else/}
+                                <p>队友：无</p>
+                            {/if}
+                        </div>
+
+                        <div class="info-row orange">
+                            <p>技能说明：
+                            {switch name="$identity"}
+                                {case value="侦探"}侦探每晚可以查验一名玩家是好人还是坏人{/case}
+                                {case value="殡仪员"}殡仪员每晚可以查看一名出局玩家的具体身份{/case}
+                                {case value="通灵者"}通灵者每晚可以得知出局玩家中有多少个鸭阵营{/case}
+                                {case value="追踪者"}追踪者每晚可以查看一名存活玩家是否为鸭或中立阵营{/case}
+                                {case value="警长"}警长每晚可以击杀一名玩家，如果击杀的是鹅则自己出局{/case}
+                                {case value="超能力者"}超能力者每晚可以指定一名玩家出局{/case}
+                                {case value="刺客"}刺客每晚可以选择一名玩家并猜测其身份，猜对则目标出局，猜错则自己出局{/case}
+                                {case value="静语者"}静语者每晚可以禁言一名玩家{/case}
+                                {case value="大忽悠鹅"}大忽悠鹅每晚可以禁言一名玩家{/case}
+                                {case value="间谍"}间谍每晚可以查看一名玩家的具体身份{/case}
+                                {case value="乌鸦"}乌鸦每晚可以选择一名玩家并猜测其身份，猜对则目标出局{/case}
+                                {case value="监狱长"}监狱长每晚可以关押一名玩家{/case}
+                                {case value="术士"}术士在第3轮和第6轮可以禁言所有玩家{/case}
+                                {case value="告密者"}告密者每晚可以关押一名玩家{/case}
+                                {case value="阵营鹅"}阵营鹅每晚可以查看两名玩家是否为同一阵营{/case}
+                                {case value="醉酒鸭"}醉酒鸭每晚可以指定两名玩家互换位置{/case}
+                                {case value="保镖"}保镖每晚可以保护一名玩家{/case}
+                                {case value="媒婆"}媒婆每晚可以选择两名玩家成为恋人{/case}
+                                {case value="爆炸王"}爆炸王每晚可以选择一名玩家，如果自己出局，该玩家也会出局{/case}
+                                {case value="和平鸽"}和平鸽每晚可以感染一名玩家成为和平鸽{/case}
+                                {default}该身份暂无特殊技能{/default}
+                            {/switch}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 排行榜页面 -->
+        <div class="main_content ranking-page">
+            <div class="ranking-content">
+                <ul class="ranking_ul" id="ranking_ul_id">
+                </ul>
+            </div>
+        </div>
+
+        <!-- 用户信息页面 -->
+        <div class="main_content user-info-page">
+            <div class="user-info-container">
+                <div class="user-header">
+                    <div class="user-avatar">
+                        <img id="userAvatar" src="" alt="用户头像">
+                    </div>
+                    <div class="user-basic-info">
+                        <div class="user-name" onclick="showNameEdit()">
+                            <span id="userName"></span>
+                        </div>
+                        <div class="user-name-edit">
+                            <input type="text" id="newUserName">
+                            <div class="edit-buttons">
+                                <button onclick="updateUserName()">保存</button>
+                                <button onclick="cancelNameEdit()" class="cancel-btn">取消</button>
+                            </div>
+                        </div>
+                        <div class="user-phone"></div>
+                    </div>
+                </div>
+
+                <!-- 添加历史对局按钮 -->
+                <div class="user-actions">
+                    <button class="history-btn" onclick="showHistory()">
+                        <span class="btn-icon">📜</span>
+                        <span class="btn-text">历史对局</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加底部导航栏 -->
+    <div id="fix_tab">
+        <ul class="fix_tab_ul">
+            <li class="fix_tab_li active">
+                <div class="nav-btn" style="background-image: url('/static/img/投票.png')"></div>
+            </li>
+            <li class="fix_tab_li">
+                <div class="nav-btn" style="background-image: url('/static/img/身份.png')"></div>
+            </li>
+            <li class="fix_tab_li">
+                <div class="nav-btn" style="background-image: url('/static/img/排行榜.png')"></div>
+            </li>
+            <li class="fix_tab_li">
+                <div class="nav-btn" style="background-image: url('/static/img/我的.png')"></div>
+            </li>
+            <li class="fix_tab_li">
+                <div class="nav-btn" onclick="goToShop()" style="background-image: url('/static/img/shop.png')"></div>
+            </li>
+        </ul>
+    </div>
+    <div id="mask_bill1">
+
+    </div>
+    <div id="mask_bill2">
+        <img src="/static/img/cha_normal.png" alt="" width="40" height="40"
+             style="position: absolute;right: 50px;top: 50px;" onclick="close_bill_detail()">
+        <div id="bill_detail">
+            <div>
+                您本次消费明细：
+            </div>
+            <div>
+                <span>游戏时长：</span>
+                <span id="bill_game_duration"></span>
+            </div>
+            <div>
+                <span>消费金额：</span>
+                <span id="bill_consumption"></span>
+            </div>
+            <div>
+                <span>账户余额：</span>
+                <span id="bill_remainder"></span>
+            </div>
+        </div>
+
+    </div>
+
+    <style>
+        .user-info-page {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: url('/static/img/背景-我的.png') no-repeat center center fixed;
+            background-size: cover;
+            display: none;
+        }
+
+        .user-info-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: none;
+            border-radius: 20px;
+            color: #FFE4B5;
+            position: relative;  /* 添加相对定位 */
+        }
+
+        .user-header {
+            display: flex;
+            position: relative;  /* 添加相对定位 */
+            margin-bottom: 80px;  /* 增加底部间距 */
+            min-height: 200px;  /* 确保有足够的高度容纳移动的元素 */
+        }
+
+        .user-avatar {
+            width: 150px;  /* 增大头像尺寸 */
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #FFE4B5;
+            position: absolute;  /* 使用绝对定位 */
+            left: 20px;  /* 向左移动 */
+            top: 20px;
+        }
+
+        .user-basic-info {
+            flex: 1;
+            padding-left: 200px;  /* 为头像留出空间 */
+            position: relative;  /* 添加相对定位 */
+        }
+
+        .user-name {
+            position: absolute;  /* 使用绝对定位 */
+            left: 200px;  /* 改为向左对齐 */
+            bottom: -40px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #FFE4B5;
+        }
+
+        .user-phone {
+            position: absolute;  /* 使用绝对定位 */
+            left: 200px;  /* 改为向左对齐 */
+            bottom: -80px;
+            font-size: 18px;
+            color: rgba(255, 228, 181, 0.8);
+        }
+
+        /* 编辑框也需要跟随移动 */
+        .user-name-edit {
+            position: absolute;
+            left: 200px;  /* 改为向左对齐 */
+            bottom: -90px;
+            display: none;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+
+        .edit-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-buttons button {
+            padding: 5px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #F5A623;
+            color: white;
+        }
+
+        .edit-buttons .cancel-btn {
+            background: #666;
+        }
+
+        .user-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            background: #F5A623;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            background: #ff9900;
+        }
+
+        .account-balance {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .balance-title {
+            font-size: 18px;
+            color: #F5A623;
+            margin-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            color: #F5A623;
+        }
+
+        .user-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            background: #F5A623;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            background: #ff9900;
+        }
+    </style>
+
+    <script>
+        // 加载用户信息
+        function loadUserInfo() {
+            $.ajax({
+                url: '/index/getUserInfo',
+                type: 'get',
+                success: function(response) {
+                    console.log('用户信息响应:', response); // 添加调试日志
+                    if(response.code === 0) {
+                        const userInfo = response.data;
+                        $('#userAvatar').attr('src', userInfo.avatar || '/static/touxiang/default.jpg');
+                        $('#userName').text(userInfo.username);
+                        $('.user-phone').text('手机号：' + userInfo.phone);
+                    } else {
+                        console.error('获取用户信息失败:', response.msg);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('请求失败:', error);
+                }
+            });
+        }
+
+        // 选择头像
+        function selectAvatar() {
+            $('#avatarInput').click();
+        }
+
+        // 上传头像
+        function uploadAvatar(input) {
+            if (input.files && input.files[0]) {
+                const formData = new FormData();
+                formData.append('avatar', input.files[0]);
+
+                $.ajax({
+                    url: '/index/updateAvatar',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if(response.code === 0) {
+                            $('#userAvatar').attr('src', response.data.avatar);
+                            alert('头像更新成功');
+                        } else {
+                            alert(response.msg || '更新失败');
+                        }
+                    }
+                });
+            }
+        }
+
+        // 显示用户名编辑框
+        function showNameEdit() {
+            const currentName = $('#userName').text();
+            $('#newUserName').val(currentName);
+            $('.user-name-edit').show();
+        }
+
+        // 取消编辑用户名
+        function cancelNameEdit() {
+            $('.user-name-edit').hide();
+        }
+
+        // 更新用户名
+        function updateUserName() {
+            const newName = $('#newUserName').val().trim();
+            if (!newName) {
+                alert('用户名不能为空');
+                return;
+            }
+
+            $.ajax({
+                url: '/index/updateUserName',
+                type: 'post',
+                data: { newName: newName },
+                success: function(response) {
+                    if (response.code === 0) {
+                        $('#userName').text(newName);
+                        $('.user-name-edit').hide();
+                        alert('用户名修改成功');
+                    } else {
+                        alert(response.msg || '修改失败，请重试');
+                    }
+                }
+            });
+        }
+
+        // 显示用户信息页面
+        function showUserInfo() {
+            // 获取用户信息
+            $.ajax({
+                url: '/index/getUserInfo',
+                type: 'get',
+                success: function(response) {
+                    if (response.code === 0) {
+                        const userInfo = response.data;
+                        $('#userAvatar').attr('src', userInfo.avatar || '/static/touxiang/default.jpg');
+                        $('#userName').text(userInfo.user_name);
+                        $('#userPhone').text(userInfo.phone);
+                        $('#userBalance').text(userInfo.balance);
+                        $('.user-info-page').fadeIn(300);  // 使用淡入效果显示
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('获取用户信息失败:', error);
+                }
+            });
+        }
+
+        // 显示历史对局
+        function showHistoryMatches() {
+            $.ajax({
+                url: '/index/getHistoryMatches',
+                type: 'get',
+                success: function(response) {
+                    if (response.code === 0) {
+                        // 处理历史对局数据
+                        // TODO: 实现历史对局显示逻辑
+                    }
+                }
+            });
+        }
+
+        // 显示账单历史
+        function showBillHistory() {
+            $.ajax({
+                url: '/index/getBillHistory',
+                type: 'get',
+                success: function(response) {
+                    if (response.code === 0) {
+                        // 处理账单历史数据
+                        // TODO: 实现账单历史显示逻辑
+                    }
+                }
+            });
+        }
+
+        // 关闭用户信息页面
+        function closeUserInfo() {
+            $('.user-info-page').fadeOut(300);  // 使用淡出效果隐藏
+        }
+
+        // 点击空白区域关闭用户信息页面
+        $('.user-info-page').on('click', function(e) {
+            if (e.target === this) {
+                closeUserInfo();
+            }
+        });
+
+        function goToShop() {
+            window.location.href = '/index/shop';
+        }
+    </script>
+    </body>
+    <!--排行榜-->
+    <script>
+        function create_ranking_dom(data) {
+            $('#ranking_ul_id').empty();
+            const displayData = data.slice(0, 10);
+            for (let i = 0; i < displayData.length; i++) {
+                const li = document.createElement('li');
+                const span_name = document.createElement('span');
+                const span_score = document.createElement('span');
+                const avatar_div = document.createElement('div');
+                const avatar_img = document.createElement('img');
+
+                if (i < 3) {
+                    li.className = 'ranking_item_li top-' + (i + 1);
+                } else {
+                    li.className = 'ranking_item_li other-rank';
+                }
+
+                span_name.className = 'ranking_item_name';
+                span_score.className = 'ranking_item_score';
+                avatar_div.className = 'ranking_item_avatar';
+                
+                // 设置头像图片
+                avatar_img.src = displayData[i].avatar;  // 直接使用完整的avatar路径
+                avatar_img.alt = displayData[i].user_name + '的头像';
+                avatar_img.onerror = function() {
+                    this.src = '/static/touxiang/default.jpg';  // 图片加载失败时使用默认头像
+                };
+                avatar_div.appendChild(avatar_img);
+
+                span_name.innerHTML = displayData[i].user_name;
+                span_score.innerHTML = displayData[i].total_score + '分';
+
+                if (i < 3) {
+                    li.appendChild(avatar_div);
+                    li.appendChild(span_name);
+                    li.appendChild(span_score);
+                } else {
+                    const rank_num = document.createElement('div');
+                    rank_num.className = 'ranking_item_position';
+                    rank_num.innerHTML = (i + 1);
+                    li.appendChild(rank_num);
+                    li.appendChild(avatar_div);
+                    li.appendChild(span_name);
+                    li.appendChild(span_score);
+                }
+                $('#ranking_ul_id').append(li);
+            }
+        }
+
+        function query_ranking_data() {
+            $.ajax({
+                url: '/index/queryRankingData',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        create_ranking_dom(d);
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        query_ranking_data();
+    </script>
+
+    <script>
+        function hide_start_anim() {
+            $('#start_anim_dom_id').css('display', 'none');
+        }
+
+        function start_anim_trigger() {
+            $('#start_anim_item_id').addClass('start_anim_class');
+            setTimeout(() => {
+                hide_start_anim();
+            }, 3000)
+        }
+
+        start_anim_trigger();
+
+        // if (!localStorage.getItem('firstVisit')) {
+        //     // 首次进入页面
+        //     start_anim_trigger();
+        //     localStorage.setItem('firstVisit', 'true');
+        // } else {
+        //     hide_start_anim();
+        //     // 刷新进入页面
+        // }
+        //
+        // window.addEventListener("beforeunload", function () {
+        //     if (localStorage.getItem('firstVisit')) {
+        //         // 如果存在，则删除它
+        //         localStorage.removeItem('firstVisit');
+        //     }
+        // });
+
+        //禁止双指放大缩小页面
+        document.documentElement.addEventListener('touchstart', function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, false);
+
+        //禁止双击放大缩小页面
+        var lastTouchEnd = 0;
+        document.documentElement.addEventListener('touchend', function (event) {
+            var now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        let selectedAvatar = null;
+        var vote_handle_player = null;
+        var vote_handle_stat = null;
+        var voted_handle = null;
+        var game_end_handle = null;
+        var if_self_out_handle = null;
+        var bantalk_handle = null;
+        var prisoner_handle = null;
+        var mn_task_handle = null;
+        var global_all_player_arr = [];
+        var global_vote_stat = '';
+        var global_if_vote_dom_exist = false;
+        var cike_or_wuya_kill_number = null;
+        const out_arr = JSON.parse('{$out_arr|raw}');
+
+        const global_bill_page_perpage_count = 5;
+        var global_curr_bill_page = 1;
+
+        // 页面加载完成后立即执行
+        $(document).ready(function() {
+            // 如果是鸭阵营且有队友数据，则显示队友
+            if ('{$group}' === '鸭' && teammate && teammate.length > 0) {
+                create_teammate_dom();
+            }
+        });
+
+        function create_teammate_dom() {
+            console.log('Creating teammate dom with data:', teammate);
+            for (let i = 0; i < teammate.length; i++) {
+                const li = document.createElement('li');
+                li.className = 'teammate_item';
+                li.innerHTML = teammate[i].game_id + '号玩家';
+                $('#teammate_ul_id').append(li);
+            }
+        }
+
+        function create_vote_form_dom(target_arr) {
+            if (document.getElementById('wait_dom_id') != null) {
+                $('#wait_dom_id').remove();
+            }
+
+            $('#vote_ul_con_id').empty();
+            const vote_form = document.createElement('form');
+            const vote_ul = document.createElement('ul');
+            vote_ul.className = 'vote_ul';
+            vote_ul.id = 'vote_ul_id';
+            vote_form.id = 'vote_form_id';
+
+            target_arr.sort((a, b) => a - b);
+
+            for (let i = 0; i < target_arr.length; i++) {
+                const vote_dom = document.createElement('li');
+                vote_dom.className = 'vote_item_li_con';
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+
+                label.className = 'vote_label';
+                label.setAttribute('for', target_arr[i]);
+                label.innerHTML = target_arr[i] + '号玩家';
+
+                checkbox.type = 'radio';
+                checkbox.id = target_arr[i];
+                checkbox.name = 'vote_item';
+                checkbox.value = target_arr[i];
+                checkbox.className = 'vote_checkbox';
+
+                vote_dom.className = 'vote_inner_li';
+
+                vote_dom.appendChild(label);
+                vote_dom.appendChild(checkbox);
+
+                vote_ul.append(vote_dom);
+            }
+
+            const submit_vote_btn = document.createElement('button');
+            submit_vote_btn.id = 'vote_button_id';
+            submit_vote_btn.type = 'button';
+            submit_vote_btn.className = 'vote_button_disable vote_button';
+            submit_vote_btn.innerHTML = '还未到投票时机';
+            submit_vote_btn.disabled = true;
+            submit_vote_btn.addEventListener('click', submit_vote_method);
+            vote_form.style.display = 'flex';
+            vote_form.style.flexFlow = 'column nowrap';
+            vote_form.style.alignItems = 'center';
+            vote_form.appendChild(vote_ul);
+            vote_form.append(submit_vote_btn);
+            $('#vote_ul_con_id').append(vote_form);
+
+        }
+
+        //后端返回数组
+        function detect_exist_player() {
+            // global_all_player_arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+            $.ajax({
+                url: '/index/queryExistPlayer',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        console.log('d:', d);
+                        global_all_player_arr = d;
+                        create_vote_form_dom(global_all_player_arr);
+                        global_if_vote_dom_exist = true;
+                        active_vote();
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+
+        }
+
+        function create_wait_dom() {
+            if (document.getElementById('wait_dom_id') == null) {
+                $('<div id="wait_dom_id" style="width:100%;text-align:center;color: deepskyblue;margin-top: 50px;font-size: 35px;">\n' +
+                    '请等待后台发送开始投票指令...\n' +
+                    '</div>').prependTo(document.getElementById('vote_ul_con_id'));
+            }
+        }
+
+        //后端返回状态
+        function detect_if_start_vote() {
+            $.ajax({
+                url: '/index/queryIfStartVote',
+                type: 'get',
+                success: function(d, s, x) {
+                    console.log('Vote check response:', d); // 添加日志
+                    if (s === 'success') {
+                        if (d === 'start') {
+                            // 直接跳转到投票页面
+                            window.location.href = '/index/vote';
+                        } else if (d === 'not_start') {
+                            global_vote_stat = 'wait';
+                            query_vote_detail_and_out_player();
+                        } else if (d === 'game_started') {
+                            create_wait_dom();
+                        }
+                    }
+                },
+                error: function(e) {
+                    console.error('Vote check error:', e);
+                }
+            });
+        }
+
+        // 修改投票检测间隔
+        vote_handle_player = setInterval(detect_if_start_vote, 1000);
+
+        function submit_vote_method() {
+            // 获取表单元素
+            const form = document.getElementById("vote_form_id");
+            
+            // 获取所有的radio按钮
+            const radios = form.elements["vote_item"];
+            
+            // 遍历radio按钮并检查哪个被选中
+            var if_select_vote = false;
+            for (var i = 0; i < radios.length; i++) {
+                if (radios[i].checked) {
+                    if_select_vote = true;
+                    $.ajax({
+                        url: '/index/submitVote',
+                        type: 'post',
+                        data: {
+                            player_gameid: radios[i].value
+                        },
+                        success: function (d, s, x) {
+                            if (s == 'success') {
+                                if (d === 'game_not_exist') {
+                                    alert('游戏不存在！');
+                                } else if (d === 'player_not_exist') {
+                                    alert('玩家不存在！');
+                                } else if (d === 'vote_repeat') {
+                                    alert('您已经投过票了！');
+                                } else if (d === 'suc') {
+                                    alert('投票成功！');
+                                    // 移除自动跳转代码
+                                } else if (d === 'fail') {
+                                    alert('投票失败！');
+                                } else if (d === 'vote_self') {
+                                    alert('不能投自己！');
+                                } else if (d === 'not_vote_time') {
+                                    alert('还未到投票时间！');
+                                } else if (d === 'you_are_out') {
+                                    alert('您已出局，投票无效！');
+                                } else if (d === 'target_is_out') {
+                                    alert('您投票的玩家已出局，投票无效！');
+                                }
+                            }
+                        },
+                        error: function (e) {
+                            console.log('网络错误:', e);
+                        }
+                    });
+                    break; // 找到选中的radio后，退出循环
+                }
+            }
+            if (!if_select_vote) {
+                alert('您还未选择投票对象');
+            }
+        }
+
+        function disable_vote() {
+            $('#vote_button_id').removeClass('vote_button_active').addClass('vote_button_disable').html('还未到投票时机').off('click');
+        }
+
+        function active_vote() {
+            $('#vote_button_id').removeClass('vote_button_disable').addClass('vote_button_active').prop('disabled', false).html('提交');
+        }
+
+        function create_voted_dom(total_count, voted_count) {
+            if (document.getElementById('voted_palyer_dom_id') == null) {
+                const dom = document.createElement('div');
+                dom.id = 'voted_palyer_dom_id';
+                dom.innerHTML = '已投票玩家数：' + voted_count + '/' + total_count;
+                dom.style.color = 'deepskyblue';
+                dom.style.fontSize = '35px';
+                dom.style.margin = '50px 0';
+                dom.style.textAlign = 'center';
+                $('#vote_ul_con_id').append(dom);
+            } else {
+                $('#voted_palyer_dom_id').html('已投票玩家数：' + voted_count + '/' + total_count);
+            }
+        }
+
+        function query_voted_player() {
+            $.ajax({
+                url: '/index/queryVotedPlayer',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        create_voted_dom(d.total, d.voted);
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function remove_vote_detail_dom() {
+            $('.detail_vote_item').remove();
+            $('.out_player_item').remove();
+        }
+
+        function create_vote_detail_dom(vote_result_obj, out_player) {
+            $('.vote_inner_li').each(function () {
+                if ($(this).children('input[type="radio"]').val().toString() in vote_result_obj) {
+                    const vote_count = document.createElement('div');
+                    vote_count.className = 'detail_vote_item';
+                    vote_count.style.fontSize = '35px';
+                    vote_count.style.position = 'absolute';
+                    vote_count.style.right = '20px';
+                    vote_count.style.top = '50%';
+                    vote_count.style.transform = 'translateY(-50%)';
+                    vote_count.style.color = 'coral';
+                    vote_count.innerHTML = vote_result_obj[$(this).children('input[type="radio"]').val().toString()] + '票';
+                    $(this).append(vote_count);
+                }
+            });
+            if (document.getElementById('out_player_hint_dom_id') == null) {
+                const out_dom = document.createElement('div');
+                out_dom.id = 'out_player_hint_dom_id';
+                out_dom.className = 'out_player_item';
+                out_dom.style.color = 'coral';
+                out_dom.style.textAlign = 'center';
+                out_dom.style.margin = '50px 0';
+                out_dom.style.fontSize = '35px';
+                const hint_text = out_player === null ? '本轮投票无人出局' : '本轮投票出局的玩家：' + out_player + '号玩家';
+                out_dom.innerHTML = hint_text;
+                $('#vote_ul_con_id').append(out_dom);
+
+            }
+        }
+
+        function query_vote_detail_and_out_player() {
+            $.ajax({
+                url: '/index/queryVoteDetail',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        if (d === 'empty') {
+
+                        } else {
+                            create_vote_detail_dom(d.detail, d.out_player)
+                        }
+
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function create_bill_dom(data, parent_dom) {
+            parent_dom.innerHTML = '';
+            for (let i = 0; i < data.length; i++) {
+                const tr = document.createElement('tr');
+                const td_join_time = document.createElement('td');
+                const td_cusume = document.createElement('td');
+                const td_stat = document.createElement('td');
+                const td_remainder = document.createElement('td');
+
+                td_join_time.innerHTML = data[i].join_time;
+                td_cusume.innerHTML = data[i].curr_consume;
+                td_remainder.innerHTML = data[i].remainder;
+                td_stat.innerHTML = data[i].settle_account_stat;
+
+                tr.style.borderTop = '1px solid darkgray';
+                tr.style.textAlign = 'center';
+                tr.appendChild(td_join_time);
+                tr.appendChild(td_cusume);
+                tr.appendChild(td_remainder);
+                tr.appendChild(td_stat);
+                parent_dom.appendChild(tr);
+            }
+        }
+
+        function create_bill_page_con_dom(length) {
+            $('#person_bill_page_con_ul').empty();
+            const page_count = Math.ceil(Number(length) / Number(global_bill_page_perpage_count));
+            for (let i = 1; i <= page_count; i++) {
+                const page_dom = document.createElement('li');
+                page_dom.innerHTML = i;
+                if (Number(i) === Number(global_curr_bill_page)) {
+                    page_dom.className = 'bill_page_con_inner_li_hover';
+                } else {
+                    page_dom.className = 'bill_page_con_inner_li';
+                }
+                $(page_dom).on('click', function () {
+                    global_curr_bill_page = Number(this.innerHTML);
+                    get_person_consume_bill(global_curr_bill_page);
+                })
+                $('#person_bill_page_con_ul').append(page_dom);
+            }
+        }
+
+        function get_person_consume_bill(curr_page_var) {
+            $.ajax({
+                url: '/index/queryPersonBill',
+                type: 'post',
+                data: {
+                    curr_page: curr_page_var,
+                    limit: global_bill_page_perpage_count
+                },
+                success: function (d, s, x) {
+                    if (s == 'success') {
+                        create_bill_dom(d.data, document.getElementById('person_bill_table_body'));
+                        create_bill_page_con_dom(d.count);
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        $('.fix_tab_li').on('click', function () {
+            const i = $('.fix_tab_li').index($(this));
+            
+            // 重置所有按钮状态为未选中
+            $('.fix_tab_li').removeClass('active').each(function() {
+                const index = $('.fix_tab_li').index($(this));
+                if (index === 0) {
+                    $(this).find('.nav-btn').css('background-image', 'url("/static/img/投票.png")');
+                } else if (index === 1) {
+                    $(this).find('.nav-btn').css('background-image', 'url("/static/img/身份.png")');
+                } else if (index === 2) {
+                    $(this).find('.nav-btn').css('background-image', 'url("/static/img/排行榜.png")');
+                } else if (index === 3) {
+                    $(this).find('.nav-btn').css('background-image', 'url("/static/img/my.png")');
+                }
+            });
+            
+            // 设置当前按钮为选中状态
+            $(this).addClass('active');
+            if (i === 0) {
+                $(this).find('.nav-btn').css('background-image', 'url("/static/img/投票.png")');
+            } else if (i === 1) {
+                $(this).find('.nav-btn').css('background-image', 'url("/static/img/身份.png")');
+            } else if (i === 2) {
+                $(this).find('.nav-btn').css('background-image', 'url("/static/img/排行榜.png")');
+            } else if (i === 3) {
+                $(this).find('.nav-btn').css('background-image', 'url("/static/img/my-active.png")');
+            }
+            
+            // 显示对应内容
+            $('.main_content').hide();
+            $('.main_content:eq(' + i + ')').show();
+            
+            // 如果是用户信息页面，加载用户数据
+            if (i === 3) {
+                loadUserInfo();
+            }
+        });
+
+        // 页面加载时初始化显示第一个页面（投票页面）
+        $(document).ready(function() {
+            $('.main_content').hide();
+            $('.main_content:eq(0)').show();
+            $('.fix_tab_li:eq(0)').addClass('active')
+                .find('.nav-btn')
+                .css('background-image', 'url("/static/img/投票.png")');
+        });
+
+        function init_vote_handle_interval() {
+            vote_handle_player = setInterval(() => {
+                detect_if_start_vote();
+                if (global_vote_stat === 'wait') {
+                    global_if_vote_dom_exist = false;
+                    disable_vote();
+                } else if (global_vote_stat === 'start_vote') {
+
+                    if (!global_if_vote_dom_exist) {
+                        detect_exist_player();
+                    }
+
+                } else if (global_vote_stat === '') {
+                    global_if_vote_dom_exist = false;
+                }
+            }, 1000)
+        }
+
+        function detect_if_game_end() {
+            $.ajax({
+                url: '/index/queryIfGameEnd',
+                type: 'get',
+                success: function(response) {
+                    if (response !== 'none') {
+                        if (response.code === 0) {
+                            let message = '游戏结束！\n';
+                            message += response.data.winner + '阵营获胜！\n';
+                            
+                            // 显示奖励信息
+                            if (response.data.rewards) {
+                                message += '\n获得奖励：\n';
+                                message += '经验值: +' + response.data.rewards.exp + '\n';
+                                message += '金币: +' + response.data.rewards.coins + '\n';
+                                message += '银币: +' + response.data.rewards.silver + '\n';
+                                
+                                if (response.data.rewards.levelUpInfo && response.data.rewards.levelUpInfo.levelUp) {
+                                    message += '\n恭喜升级！\n';
+                                    message += '当前等级：' + response.data.rewards.levelUpInfo.newLevel + '\n';
+                                    message += '升级奖励：\n';
+                                    message += '金币: +' + response.data.rewards.levelUpInfo.rewards.coins + '\n';
+                                    message += '银币: +' + response.data.rewards.levelUpInfo.rewards.silver;
+                                }
+                            }
+                            
+                            alert(message);
+                        }
+                    }
+                }
+            });
+        }
+
+        function detect_if_self_relive_and_remove_dom() {
+            if (document.getElementById('out_self_hint_dom_id') != null) {
+                $('#out_self_hint_dom_id').remove();
+            }
+        }
+
+        function detect_if_self_out_and_create_dom() {
+            if (document.getElementById('out_self_hint_dom_id') == null) {
+                const self_out_dom = document.createElement('div');
+                self_out_dom.id = 'out_self_hint_dom_id';
+                self_out_dom.className = 'out_self_class';
+                self_out_dom.style.color = 'coral';
+                self_out_dom.style.textAlign = 'center';
+                self_out_dom.style.fontSize = '22px';
+                self_out_dom.style.width = '100vw';
+                self_out_dom.innerHTML = '您已出局';
+                $('#self_out_div_id').append(self_out_dom);
+            }
+        }
+
+        function detect_if_self_out_handle() {
+            if_self_out_handle = setInterval(() => {
+                $.ajax({
+                    url: '/index/queryIfSelfOut',
+                    type: 'post',
+                    data: {
+                        game_id: {$number}
+                    },
+                    success: function (d, s, x) {
+                        if (s == 'success') {
+                            if (d === 'out') {
+                                // clearInterval(if_self_out_handle);
+                                detect_if_self_out_and_create_dom();
+                            } else {
+                                detect_if_self_relive_and_remove_dom();
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        alert('网络错误:' + e)
+                    }
+                })
+            }, 1000)
+        }
+
+        function init_img() {
+            switch ('{$identity}') {
+                case '食鸟鸭': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/shiniaoya.png');
+                    break;
+                }
+                case '静语者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/jingyuzhe.png');
+                    break;
+                }
+                case '大忽悠鹅': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/biehuyoue.png');
+                    break;
+                }
+                case '专业杀手': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/zhuanyeshashou.png');
+                    break;
+                }
+                case '爆炸王': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/baozhawang.png');
+                    break;
+                }
+                case '间谍': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/jiandie.png');
+                    break;
+                }
+                case '丧葬者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/sangzangzhe.png');
+                    break;
+                }
+                case '老闭灯鸭': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/laobidengya.png');
+                    break;
+                }
+                case '派对狂': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/paiduikuang.png');
+                    break;
+                }
+                case '连环杀手': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/lianhuanshashou.png');
+                    break;
+                }
+                case '超能力者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/chaonenglizhe.png');
+                    break;
+                }
+                case '传教士': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/chuanjiaoshi.png');
+                    break;
+                }
+                case '大白鹅': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/dabaie.png');
+                    break;
+                }
+                case '通灵者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/tonglingzhe.png');
+                    break;
+                }
+                case '加拿大鹅': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/jianadae.png');
+                    break;
+                }
+                case '侦探': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/zhentan.png');
+                    break;
+                }
+                case '正义使者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/zhengyishizhe.png');
+                    break;
+                }
+                case '观鸟者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/guanniaozhe.png');
+                    break;
+                }
+                case '殡仪员': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/binyiyuan.png');
+                    break;
+                }
+                case '复仇者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/fuchouzhe.png');
+                    break;
+                }
+                case '星界行者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/xingjiexingzhe.png');
+                    break;
+                }
+                case '秃鹫': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/tujiu.png');
+                    break;
+                }
+                case '呆呆鸟': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/daidainiao.png');
+                    break;
+                }
+                case '鹦鹉': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/yingwu.png');
+                    break;
+                }
+                case '决斗呆呆鸟': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/juedoudaidainiaomen.png');
+                    break;
+                }
+                case '猎鹰': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/lieying.png');
+                    break;
+                }
+                
+                case '鹈鹕': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/tihu.png');
+                    break;
+                }
+                case '恋人': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/lianren.png');
+                    break;
+                }
+                case '警长': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/jingzhang.png');
+                    break;
+                }
+                case '政治家': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/zhengzhijia.png');
+                    break;
+                }
+                case '乌鸦': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/wuya.png');
+                    break;
+                }
+                case '和平鸽': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/hepingge.png');
+                    break;
+                }
+                case '追踪者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/zhuizongzhe.png');
+                    break;
+                }
+                case '模仿者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/mofangzhe.png');
+                    break;
+                }
+                case '刺客': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/cike.png');
+                    break;
+                }
+                case '监狱长': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/jianyuzhang.png');
+                    break;
+                }
+                case '术士': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/shushi.png');
+                    break;
+                }
+                case '告密者': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/gaomizhe.png');
+                    break;
+                }
+                case '变形鸭': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/bianxingya.png');
+                    break;
+                }
+                case '保镖': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/baobiao.png');
+                    break;
+                }
+                case '媒婆': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/meipo.png');
+                    break;
+                }
+                case '阵营鹅': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/zhenyinge.png');
+                    break;
+                }
+                case '醉酒鸭': {
+                    $('#identity_img_id').prop('src', '/static/identity_img/zuijiuya.png');
+                    break;
+                }
+            }
+        }
+
+        detect_if_self_out_handle();
+        if ('{$group}' == '鸭') {
+            create_teammate_dom();
+        } else {
+            $('#teammate_con_id').remove();
+        }
+
+        function skill_zhentan() {
+            const target = prompt('请输入要观察的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/zhentanSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'good') {
+                                alert('您观察的玩家为好');
+                            } else if (d === 'bad') {
+                                alert('您观察的玩家为坏');
+                            } else if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'not_find_player') {
+                                alert('你输入的玩家号码有误');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_is_out') {
+                                alert('您观察的玩家已出局');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_binyiyuan() {
+            const target = prompt('请输入要查看的出局玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/binyiyuanSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'find_none') {
+                                alert('您输入的玩家号码不存在');
+                            } else if (d === 'target_is_alive') {
+                                alert('您查看的玩家还存活');
+                            } else {
+                                alert('您查看的出局玩家的身份是' + d);
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_chaonenglizhe() {
+            const target = prompt('请输入要出局的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/chaonenglizheSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_is_self') {
+                                alert('不能对自己用此技能');
+                            } else if (d === 'target_is_have_out') {
+                                alert('该玩家已经出局');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'target_out') {
+                                alert('该玩家出局');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_tonglingzhe() {
+            $.ajax({
+                url: '/index/tonglingzheSkill',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        if (d === 'not_in_time') {
+                            alert('未到发动技能时间');
+                        } else if (d === 'out') {
+                            alert('您已出局,不能使用技能');
+                        } else if (d === 'used') {
+                            alert('你在本轮已使用过技能');
+                        } else {
+                            alert('已出局玩家中有' + d + '个鸭阵营玩家');
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function skill_zhuizongzhe() {
+            $.ajax({
+                url: '/index/zhuizongzheSkill',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        if (d === 'not_in_time') {
+                            alert('未到发动技能时间');
+                        } else if (d === 'out') {
+                            alert('您已出局,不能使用技能');
+                        } else if (d === 'used') {
+                            alert('你在本轮已使用过技能');
+                        } else if (d === 'none') {
+                            alert('已经查看完所有鸭和中立');
+                        } else if (d === '追踪者') {
+                            alert(d);
+                        } else {
+                            if (d.ya && d.zhongli) {
+                                alert(d.ya + '，' + d.zhongli);
+                            } else if (d.ya) {
+                                alert(d.ya);
+                            } else if (d.zhongli) {
+                                alert(d.zhongli);
+                            }
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function skill_jingzhang() {
+            const target = prompt('请输入要击杀的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/jingzhangSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_is_self') {
+                                alert('不能对自己用此技能');
+                            } else if (d === 'target_is_have_out') {
+                                alert('该玩家已经出局');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'target_is_e') {
+                                alert('小脑警长！您已出局！');
+                            } else if (d === 'target_is_not_e') {
+                                alert('大脑警长！您太棒啦！');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_guanniaozhe() {
+            console.log('使用观鸟者技能...');
+            $.ajax({
+                url: '/index/guanniaozheSkill',
+                type: 'get',
+                success: function (d, s, x) {
+                    console.log('观鸟者技能返回:', d);
+                    if (s === 'success') {
+                        if (d === 'not_in_time') {
+                            alert('未到发动技能时间');
+                        } else if (d === 'out') {
+                            alert('您已出局,不能使用技能');
+                        } else if (d === 'used') {
+                            alert('你在本轮已使用过技能');
+                        } else if (d.code === 1) {
+                            alert(d.msg);
+                        } else if (d.code === 0) {
+                            alert('存活玩家中有 ' + d.data + ' 个鸭阵营玩家');
+                        } else {
+                            alert('技能使用失败');
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                    // 3秒后自动重试
+                    setTimeout(skill_guanniaozhe, 3000);
+                }
+            });
+        }
+
+        // 添加技能可用性检查函数
+        function checkSkillAvailable() {
+            const gameInfo = getGameInfo();
+            if (!gameInfo) {
+                alert('无法获取游戏信息');
+                return false;
+            }
+
+            if (gameInfo.status === 'out') {
+                alert('您已出局,不能使用技能');
+                return false;
+            }
+
+            if (!gameInfo.isSkillTime) {
+                alert('未到发动技能时间');
+                return false;
+            }
+
+            if (gameInfo.hasUsedSkill) {
+                alert('你在本轮已使用过技能');
+                return false;
+            }
+
+            return true;
+        }
+
+        // 获取游戏状态信息
+        function getGameInfo() {
+            let gameInfo = null;
+            $.ajax({
+                url: '/index/getGameInfo',
+                type: 'get',
+                async: false,
+                success: function(response) {
+                    if (response.code === 0) {
+                        gameInfo = response.data;
+                    }
+                }
+            });
+            return gameInfo;
+        }
+
+        function reset_kill_number_method() {
+            const target = prompt('请输入要击杀的玩家号码');
+            if (target) {
+                cike_or_wuya_kill_number = target;
+            }
+        }
+
+        function confirm_kill_number_method() {
+            if ($('#mask_identity_select').val() != '') {
+                if ('{$identity}' == '刺客') {
+                    $.ajax({
+                        url: '/index/cikeSkill',
+                        type: 'post',
+                        data: {
+                            target_player: cike_or_wuya_kill_number,
+                            target_iden: $('#mask_identity_select').val()
+                        },
+                        success: function (ds, ss, xs) {
+                            if (ss === 'success') {
+                                $('#mask_identity_select_con_id').css('display', 'none');
+                                $('#mask_identity_select_main_id').css('display', 'none');
+                                if (ds === 'not_in_time') {
+                                    alert('未到发动技能时间');
+                                } else if (ds === 'out') {
+                                    alert('您已出局,不能使用技能');
+                                } else if (ds === 'used') {
+                                    alert('你在本轮已使用过技能');
+                                } else if (ds === 'target_is_have_out') {
+                                    alert('该玩家已经出局');
+                                } else if (ds === 'target_not_exist') {
+                                    alert('玩家号码输入有误');
+                                } else if (ds === 'suc') {
+                                    alert('玩家身份选择正确，该玩家出局');
+                                } else if (ds === 'fail') {
+                                    alert('玩家身份选择错误，您出局');
+                                }
+                            }
+                        },
+                        error: function (ee) {
+                            alert('网络错误:' + ee);
+                        }
+                    })
+                } 
+                else if ('{$identity}' == '乌鸦') {
+                    $.ajax({
+                        url: '/index/wuyaSkill',
+                        type: 'post',
+                        data: {
+                            target_player: cike_or_wuya_kill_number,
+                            target_iden: $('#mask_identity_select').val()
+                        },
+                        success: function (ds, ss, xs) {
+                            if (ss === 'success') {
+                                $('#mask_identity_select_con_id').css('display', 'none');
+                                $('#mask_identity_select_main_id').css('display', 'none');
+                                if (ds === 'not_in_time') {
+                                    alert('未到发动技能时间');
+                                } else if (ds === 'out') {
+                                    alert('您已出局,不能使用技能');
+                                } else if (ds === 'used') {
+                                    alert('你在本轮已使用过技能');
+                                } else if (ds === 'target_is_have_out') {
+                                    alert('该玩家已经出局');
+                                } else if (ds === 'target_not_exist') {
+                                    alert('玩家号码输入有误');
+                                } else if (ds === 'suc') {
+                                    alert('玩家身份选择正确，该玩家出局');
+                                } else if (ds === 'fail') {
+                                    alert('玩家身份选择错误');
+                                }
+                            }
+                        },
+                        error: function (ee) {
+                            alert('网络错误:' + ee);
+                        }
+                    })
+                }
+
+            } else {
+                alert('请选择要击杀玩家的身份');
+            }
+        }
+
+        function skill_cike() {
+            const target = prompt('请输入要击杀的玩家号码');
+            if (target) {
+                cike_or_wuya_kill_number = target;
+                $.ajax({
+                    url: '/index/sendIdentity',
+                    data: {
+                        identity_type: 'cike'
+                    },
+                    type: 'post',
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            console.log('d:', d);
+                            $('#mask_identity_select').empty();
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.innerHTML = '';
+                            $('#mask_identity_select').append(option);
+                            for (let i = 0; i < d.length; i++) {
+                                const option = document.createElement('option');
+                                option.value = d[i];
+                                option.innerHTML = d[i];
+                                $('#mask_identity_select').append(option);
+                            }
+                            $('#mask_identity_select_con_id').css('display', 'flex');
+                            $('#mask_identity_select_main_id').css('display', 'flex');
+                            // $('#mask_identity_select').off('change');
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+        function skill_hepingge() {
+            const target = prompt('请输入要感染的玩家号码');
+            if (target) {
+                cike_or_wuya_kill_number = target;
+                $.ajax({
+                    url: '/index/sendIdentity',
+                    data: {
+                        identity_type: 'cike'
+                    },
+                    type: 'post',
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            console.log('d:', d);
+                            $('#mask_identity_select').empty();
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.innerHTML = '';
+                            $('#mask_identity_select').append(option);
+                            for (let i = 0; i < d.length; i++) {
+                                const option = document.createElement('option');
+                                option.value = d[i];
+                                option.innerHTML = d[i];
+                                $('#mask_identity_select').append(option);
+                            }
+                            $('#mask_identity_select_con_id').css('display', 'flex');
+                            $('#mask_identity_select_main_id').css('display', 'flex');
+                            // $('#mask_identity_select').off('change');
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_jiandie() {
+            const target = prompt('请输入要观察身份的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/jiandieSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_is_have_out') {
+                                alert('该玩家已经出局');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else {
+                                alert('该玩家的身份是' + d);
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_wuya() {
+            const target = prompt('请输入要击杀的玩家号码');
+            if (target) {
+                cike_or_wuya_kill_number = target;
+                $.ajax({
+                    url: '/index/sendIdentity',
+                    data: {
+                        identity_type: 'wuya'
+                    },
+                    type: 'post',
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            console.log('d:', d);
+                            $('#mask_identity_select').empty();
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.innerHTML = '';
+                            $('#mask_identity_select').append(option);
+                            for (let i = 0; i < d.length; i++) {
+                                const option = document.createElement('option');
+                                option.value = d[i];
+                                option.innerHTML = d[i];
+                                $('#mask_identity_select').append(option);
+
+                            }
+                            $('#mask_identity_select_con_id').css('display', 'flex');
+                            $('#mask_identity_select_main_id').css('display', 'flex');
+                            // $('#mask_identity_select').off('change');
+
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_jingyuzhe() {
+            const target = prompt('请输入要禁言的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/jingyuzheSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_is_have_out') {
+                                alert('该玩家已经出局');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'suc') {
+                                alert('该玩家已被禁言');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+        function skill_biehuyoue() {
+            const target = prompt('请输入要禁言的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/jingyuzheSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_is_have_out') {
+                                alert('该玩家已经出局');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'suc') {
+                                alert('该玩家已被禁言');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_jianyuzhang() {
+            const target = prompt('请输入要关到监狱的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/jianyuzhangSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_is_have_out') {
+                                alert('该玩家已经出局');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'suc') {
+                                alert('该玩家已被关到监狱');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_gaomizhe() {
+            const target = prompt('请输入要关到监狱的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/gaomizheSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_is_have_out') {
+                                alert('该玩家已经出局');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'suc') {
+                                alert('该玩家已被关到监狱');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_shushi() {
+            $.ajax({
+                url: '/index/shushiSkill',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        if (d === 'not_in_time') {
+                            alert('未到发动技能时间');
+                        } else if (d === 'out') {
+                            alert('您已出局,不能使用技能');
+                        } else if (d === 'used') {
+                            alert('你在本轮已使用过技能');
+                        } else if (d === 'suc') {
+                            alert('全员已禁言');
+                        } else if (d === 'fail') {
+                            alert('非第3轮、第6轮不能发动此技能');
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function skill_zhenyinge() {
+            const target = prompt('请输入要观察的2位玩家号码，用空格分隔');
+            const target_arr = target.split(' ');
+            if (target) {
+                $.ajax({
+                    url: '/index/zhenyingeSkill',
+                    type: 'post',
+                    data: {
+                        target_players: JSON.stringify(target_arr)
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'same') {
+                                alert('是同一阵营');
+                            } else if (d === 'not_same') {
+                                alert('不是同一阵营');
+                            } else if (d === 'deny_detect_self') {
+                                alert('不能查验自己');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_zuijiuya() {
+            const target = prompt('请输入要指定的2位玩家号码，用空格分隔');
+            const target_arr = target.split(' ');
+            if (target) {
+                $.ajax({
+                    url: '/index/zuijiuyaSkill',
+                    type: 'post',
+                    data: {
+                        target_players: JSON.stringify(target_arr)
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('你在本轮已使用过技能');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'suc') {
+                                alert('技能发动成功');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_baobiao() {
+            const target = prompt('请输入要绑定的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/baobiaoSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('您在本轮已使用过技能');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'suc') {
+                                alert('技能发动成功');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+    function skill_meipo() {
+            const target = prompt('请输入要绑定的2位玩家号码，用空格分隔');
+            const target_arr = target.split(' ');
+            if (target) {
+                $.ajax({
+                    url: '/index/meipoSkill',
+                    type: 'post',
+                    data: {
+                        target_players: JSON.stringify(target_arr)
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('您在本轮已使用过技能');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'suc') {
+                                alert('技能发动成功');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+        function skill_baozhawang() {
+            const target = prompt('请输入要绑定的玩家号码');
+            if (target) {
+                $.ajax({
+                    url: '/index/baozhawangSkill',
+                    type: 'post',
+                    data: {
+                        target_player: target
+                    },
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d === 'not_in_time') {
+                                alert('未到发动技能时间');
+                            } else if (d === 'out') {
+                                alert('您已出局,不能使用技能');
+                            } else if (d === 'used') {
+                                alert('您在本轮已使用过技能');
+                            } else if (d === 'target_not_exist') {
+                                alert('玩家号码输入有误');
+                            } else if (d === 'suc') {
+                                alert('技能发动成功');
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        function skill_event(e) {
+            const self_iden = e.target.getAttribute('iden');
+            switch (self_iden) {
+                case '追踪者': {
+                    skill_zhuizongzhe();
+                    break;
+                }
+                case '观鸟者': {
+                    skill_guanniaozhe();
+                    break;
+                }
+                case '侦探': {
+                    skill_zhentan();
+                    break;
+                }
+                case '通灵者': {
+                    skill_tonglingzhe();
+                    break;
+                }
+                case '殡仪员': {
+                    skill_binyiyuan();
+                    break;
+                }
+                case '警长': {
+                    skill_jingzhang();
+                    break;
+                }
+                case '超能力者': {
+                    skill_chaonenglizhe();
+                    break;
+                }
+                case '刺客': {
+                    skill_cike();
+                    break;
+                }
+                case '静语者': {
+                    skill_jingyuzhe();
+                    break;
+                }
+                case '大忽悠鹅': {
+                    skill_jingyuzhe();
+                    break;
+                }
+                case '间谍': {
+                    skill_jiandie();
+                    break;
+                }
+                case '乌鸦': {
+                    skill_wuya();
+                    break;
+                }
+                case '监狱长': {
+                    skill_jianyuzhang();
+                    break;
+                }
+                case '术士': {
+                    skill_shushi();
+                    break;
+                }
+                case '告密者': {
+                    skill_gaomizhe();
+                    break;
+                }
+                case '阵营鹅': {
+                    skill_zhenyinge();
+                    break;
+                }
+                case '醉酒鸭': {
+                    skill_zuijiuya();
+                    break;
+                }
+                case '保镖': {
+                    skill_baobiao();
+                    break;
+                }
+                case '媒婆': {
+                    skill_meipo();
+                    break;
+                }
+                case '爆炸王': {
+                    skill_baozhawang();
+                    break;
+                }
+            }
+        }
+
+        function create_skill_dom() {
+            const identity = '{$identity}';
+            console.log('Current identity:', identity); // 添加调试日志
+            
+            const skill_button = document.querySelector('.skill-button');
+            if (!skill_button) {
+                console.error('Skill button not found');
+                return;
+            }
+            
+            const validIdentities = ['追踪者', '观鸟者', '侦探', '通灵者', '殡仪员', '警长', '超能力者', '刺客', '静语者','大忽悠鹅', '间谍', '乌鸦', '和平鸽','监狱长', '术士', '告密者', '爆炸王', '保镖', '媒婆','阵营鹅', '醉酒鸭'];
+            
+            if (validIdentities.includes(identity)) {
+                skill_button.setAttribute('iden', identity);
+                skill_button.style.display = 'block';
+                console.log('Skill enabled for identity:', identity);
+            } else {
+                skill_button.style.display = 'none';
+                console.log('No skill available for identity:', identity);
+            }
+        }
+
+        function use_skill() {
+            const identity = '{$identity}';
+            console.log('Using skill for identity:', identity);
+            
+            switch(identity) {
+                case '侦探':
+                    skill_zhentan();
+                    break;
+                case '观鸟者':
+                    skill_guanniaozhe();
+                    break;
+                case '殡仪员':
+                    skill_binyiyuan();
+                    break;
+                case '通灵者':
+                    skill_tonglingzhe();
+                    break;
+                case '追踪者':
+                    skill_zhuizongzhe();
+                    break;
+                case '警长':
+                    skill_jingzhang();
+                    break;
+                case '超能力者':
+                    skill_chaonenglizhe();
+                    break;
+                case '刺客':
+                    skill_cike();
+                    break;
+                case '静语者':
+                    skill_jingyuzhe();
+                    break;
+                case '大忽悠鹅':
+                    skill_biehuyoue();
+                    break;
+                case '间谍':
+                    skill_jiandie();
+                    break;
+                case '乌鸦':
+                    skill_wuya();
+                    break;
+                case '监狱长':
+                    skill_jianyuzhang();
+                    break;
+                case '术士':
+                    skill_shushi();
+                    break;
+                case '告密者':
+                    skill_gaomizhe();
+                    break;
+                case '阵营鹅':
+                    skill_zhenyinge();
+                    break;
+                case '醉酒鸭':
+                    skill_zuijiuya();
+                    break;
+                case '保镖':
+                    skill_baobiao();
+                    break;
+                case '媒婆':
+                    skill_meipo();
+                    break;
+                case '爆炸王':
+                    skill_baozhawang();
+                    break;
+                case '和平鸽':
+                    skill_hepingge();
+                    break;
+                default:
+                    alert('该身份暂无技能可用');
+                    break;
+            }
+        }
+
+        detect_if_self_out_handle();
+        if ('{$group}' == '鸭') {
+            create_teammate_dom();
+        } else {
+            $('#teammate_con_id').remove();
+        }
+
+        function detect_if_bantalk() {
+            $.ajax({
+                url: '/index/detectIfSelfBantalk',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        console.log('d:', d);
+                        if (d.single.indexOf({$number}) !== -1 || d.all) {
+                            if (document.getElementById('bantalk_id') == null) {
+                                const bantalk_dom = document.createElement('div');
+                                bantalk_dom.id = 'bantalk_id';
+                                bantalk_dom.style.color = 'coral';
+                                bantalk_dom.innerHTML = '您已被禁言';
+                                $('#identity_show_con_id').prepend(bantalk_dom);
+                            } else {
+
+                            }
+                        } else {
+                            if (document.getElementById('bantalk_id') != null) {
+                                $('#bantalk_id').remove();
+                            }
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function detect_if_prison() {
+            $.ajax({
+                url: '/index/detectIfSelfPrison',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        console.log('d:', d);
+                        if (d.indexOf({$number}) !== -1) {
+                            if (document.getElementById('prison_id') == null) {
+                                const prison_dom = document.createElement('div');
+                                prison_dom.id = 'prison_id';
+                                prison_dom.style.color = 'coral';
+                                prison_dom.innerHTML = '您已被关到监狱';
+                                $('#identity_show_con_id').prepend(prison_dom);
+                            } else {
+
+                            }
+                        } else {
+                            if (document.getElementById('prison_id') != null) {
+                                $('#prison_id').remove();
+                            }
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function detect_mn_task_score() {
+            $.ajax({
+                url: '/index/detectMnTaskScore',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        $('#mn_task_score').html(d);
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function create_another_lover_dom(number) {
+            $('.game_identity_hint').after('<div>另外一名恋人:' + number + '号玩家</div>');
+        }
+
+        function detect_if_lover_show_another() {
+            if ('{$identity}' === '恋人') {
+                $.ajax({
+                    url: '/index/showAnotherLover',
+                    type: 'get',
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            if (d != 'none') {
+                                create_another_lover_dom(d);
+                            }
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                })
+            }
+        }
+
+        init_img();
+        create_skill_dom();
+        detect_if_lover_show_another();
+        mn_task_handle = setInterval(detect_mn_task_score, 1000);
+        prisoner_handle = setInterval(detect_if_prison, 1000);
+        bantalk_handle = setInterval(detect_if_bantalk, 1000);
+        game_end_handle = setInterval(detect_if_game_end, 1000);
+        init_vote_handle_interval();
+    </script>
+
+    <!--结账-->
+    <script>
+        var bill_info_handle = null;
+
+        bill_info_handle = setInterval(detect_if_settle_account, 1000);
+
+        function update_if_view_bill() {
+            $.ajax({
+                url: '/index/updateIfUserViewBill',
+                type: 'get',
+                success: function (d, s, x) {
+                    console.log('结果:', d);
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        /**
+         * 检测是否需要结算账单
+         * 通过Ajax定期向服务器发送请求，检查是否需要进行账单结算
+         */
+        function detect_if_settle_account() {
+            $.ajax({
+                // 发送请求到结算检测接口
+                url: '/index/detectIfSettleAccount',
+                type: 'get',
+                success: function (d, s, x) {
+                    if (s === 'success') {
+                        // 如果返回数据不是'none'，说明需要结算
+                        if (d != 'none') {
+                            // 更新账单视图
+                            update_if_view_bill();
+                            // 清除定时器，停止轮询
+                            clearInterval(bill_info_handle);
+                            // 打开账单弹窗，显示游戏时长、消费金额和剩余金额
+                            open_mask_bill(d.duration, d.consumption, d.reamainder);
+                        }
+                    }
+                },
+                error: function (e) {
+                    console.log('网络错误:', e);
+                }
+            })
+        }
+
+        function close_bill_detail() {
+            $('#mask_bill1').css('display', 'none');
+            $('#mask_bill2').css('display', 'none');
+            $('#main_content_con_id').css('filter', 'blur(0)');
+            $('#fix_tab').css('filter', 'blur(0)');
+        }
+
+        function open_mask_bill(dur, con, rem) {
+            $('#mask_bill1').css('display', 'block');
+            $('#mask_bill2').css('display', 'block');
+            $('#main_content_con_id').css('filter', 'blur(4px)');
+            $('#fix_tab').css('filter', 'blur(4px)');
+            $('#bill_game_duration').html(dur + '小时');
+            $('#bill_consumption').html(con + '元');
+            $('#bill_remainder').html(rem + '元');
+        }
+
+
+    </script>
+
+    <script>
+        // 根据身份创建技能按钮
+        function use_skill() {
+            const skill_button = document.querySelector('.skill-button');
+            const identity = skill_button.getAttribute('data-identity');
+            
+            switch(identity) {
+                case '侦探':
+                    skill_zhentan();
+                    break;
+                case '殡仪员':
+                    skill_binyiyuan();
+                    break;
+                case '通灵者':
+                    skill_tonglingzhe();
+                    break;
+                case '追踪者':
+                    skill_zhuizongzhe();
+                    break;
+                case '警长':
+                    skill_jingzhang();
+                    break;
+                case '超能力者':
+                    skill_chaonenglizhe();
+                    break;
+                case '刺客':
+                    skill_cike();
+                    break;
+                case '静语者':
+                    skill_jingyuzhe();
+                    break;
+                case '大忽悠鹅':
+                    skill_biehuyoue();
+                    break;
+                case '间谍':
+                    skill_jiandie();
+                    break;
+                case '乌鸦':
+                    skill_wuya();
+                    break;
+                case '监狱长':
+                    skill_jianyuzhang();
+                    break;
+                case '术士':
+                    skill_shushi();
+                    break;
+                case '告密者':
+                    skill_gaomizhe();
+                    break;
+                case '阵营鹅':
+                    skill_zhenyinge();
+                    break;
+                case '醉酒鸭':
+                    skill_zuijiuya();
+                    break;
+                case '保镖':
+                    skill_baobiao();
+                    break;
+                case '媒婆':
+                    skill_meipo();
+                    break;
+                case '爆炸王':
+                    skill_baozhawang();
+                    break;
+                case '和平鸽':
+                    skill_hepingge();
+                    break;
+                default:
+                    alert('该身份暂无技能可用');
+                    break;
+            }
+        }
+    </script>
+
+    <script>
+        function createVoteCards(players) {
+            const voteGrid = document.getElementById('vote_grid');
+            voteGrid.innerHTML = ''; // 清空现有内容
+            
+            players.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'vote-card';
+                card.style.background = `url('/static/img/${player}.png') no-repeat center center`;
+                card.style.backgroundSize = 'contain';
+                card.setAttribute('data-player', player);
+                
+                const number = document.createElement('div');
+                number.className = 'player-number';
+                number.textContent = player + '号玩家';
+                
+                card.appendChild(number);
+                
+                card.addEventListener('click', () => {
+                    // 移除其他卡片的选中状态
+                    document.querySelectorAll('.vote-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    // 添加当前卡片的选中状态
+                    card.classList.add('selected');
+                });
+                
+                voteGrid.appendChild(card);
+            });
+        }
+
+        function showVotePage() {
+            // 隐藏原有投票页面
+            document.querySelector('.vote-page').style.display = 'none';
+            // 显示新投票页面
+            document.getElementById('vote_page_new').style.display = 'flex';
+            // 获取玩家列表并创建投票卡片
+            createVoteCards(global_all_player_arr);
+        }
+
+        function submitVote() {
+            const selectedCard = document.querySelector('.vote-card.selected');
+            if (!selectedCard) {
+                alert('请选择要投票的玩家');
+                return;
+            }
+            
+            const targetPlayer = selectedCard.getAttribute('data-player');
+            $.ajax({
+                url: '/index/submitVote',
+                type: 'post',
+                data: {
+                    player_gameid: targetPlayer
+                },
+                success: function(d, s, x) {
+                    if (s == 'success') {
+                        if (d === 'game_not_exist') {
+                            alert('游戏不存在！');
+                        } else if (d === 'player_not_exist') {
+                            alert('玩家不存在！');
+                        } else if (d === 'vote_repeat') {
+                            alert('您已经投过票了！');
+                        } else if (d === 'suc') {
+                            alert('投票成功！');
+                            skipVote(); // 投票成功后返回原页面
+                        } else if (d === 'fail') {
+                            alert('投票失败！');
+                        } else if (d === 'vote_self') {
+                            alert('不能投自己！');
+                        } else if (d === 'not_vote_time') {
+                            alert('还未到投票时间！');
+                        } else if (d === 'you_are_out') {
+                            alert('您已出局，投票无效！');
+                        } else if (d === 'target_is_out') {
+                            alert('您投票的玩家已出局，投票无效！');
+                        }
+                    }
+                },
+                error: function(e) {
+                    console.log('网络错误:', e);
+                }
+            });
+        }
+
+        function skipVote() {
+            // 显示原有投票页面
+            document.querySelector('.vote-page').style.display = 'block';
+            // 隐藏新投票页面
+            document.getElementById('vote_page_new').style.display = 'none';
+        }
+
+        // 修改原有的detect_if_start_vote函数
+        function detect_if_start_vote() {
+            $.ajax({
+                url: '/index/queryIfStartVote',
+                type: 'get',
+                success: function(d, s, x) {
+                    if (s == 'success') {
+                        if (d === 'start') {
+                            global_vote_stat = 'start_vote';
+                            remove_vote_detail_dom();
+                            clearInterval(voted_handle);
+                            voted_handle = setInterval(query_voted_player, 1000);
+                            // 跳转到新的投票页面
+                            window.location.href = '/index/vote';
+                        } else if (d === 'not_start') {
+                            global_vote_stat = 'wait';
+                            query_vote_detail_and_out_player();
+                        } else if (d === 'game_started') {
+                            create_wait_dom();
+                        }
+                    }
+                },
+                error: function(e) {
+                    console.log('网络错误:', e);
+                }
+            });
+        }
+    </script>
+
+    <script>
+        // 页面加载时清除投票状态
+        window.onload = function() {
+            localStorage.removeItem('voteCompleted');
+        }
+    </script>
+
+    <script>
+    $(document).ready(function() {
+        // 初始化导航按钮
+        initializeNavButtons();
+        
+        // 绑定导航按钮点击事件
+        $('.fix_tab_li').on('click', function() {
+            const i = $(this).index();
+            switchTab(i);
+        });
+    });
+
+    // 初始化导航按钮
+    function initializeNavButtons() {
+        // 设置默认显示投票页面
+        $('.main_content').hide();
+        $('.main_content:eq(0)').show();
+        
+        // 初始化所有按钮状态
+        $('.fix_tab_li').each(function(index) {
+            const buttonName = getButtonName(index);
+            $(this).find('.nav-btn').css('background-image', `url("/static/img/${buttonName}.png")`);
+        });
+        
+        // 激活第一个按钮
+        $('.fix_tab_li:eq(0)').addClass('active')
+            .find('.nav-btn')
+            .css('background-image', 'url("/static/img/投票.png")');
+    }
+
+    // 切换标签页
+    function switchTab(index) {
+        // 重置所有按钮状态
+        $('.fix_tab_li').removeClass('active');
+        $('.fix_tab_li').each(function(i) {
+            const buttonName = getButtonName(i);
+            $(this).find('.nav-btn').css('background-image', `url("/static/img/${buttonName}.png")`);
+        });
+        
+        // 激活当前按钮
+        $('.fix_tab_li:eq(' + index + ')').addClass('active')
+            .find('.nav-btn')
+            .css('background-image', `url("/static/img/${getButtonName(index)}_active.png")`);
+        
+        // 显示对应内容
+        $('.main_content').hide();
+        $('.main_content:eq(' + index + ')').show();
+    }
+
+    // 获取按钮图片名称
+    function getButtonName(index) {
+        switch(index) {
+            case 0: return '投票';
+            case 1: return '身份';
+            case 2: return '排行榜';
+            default: return '';
+        }
+    }
+    </script>
+
+    <script>
+        // 添加调试函数
+        function debugIdentity() {
+            const identity = '{$identity}';
+            const skill_button = document.querySelector('.skill-button');
+            const buttonIdentity = skill_button.getAttribute('data-identity');
+            
+            console.log('Template identity:', identity);
+            console.log('Button identity:', buttonIdentity);
+            console.log('Button element:', skill_button);
+        }
+
+        // 页面加载完成后执行调试
+        $(document).ready(function() {
+            debugIdentity();
+        });
+
+        // 修改use_skill函数
+        function use_skill() {
+            const identity = '{$identity}';  // 直接使用模板变量
+            console.log('Using skill for identity:', identity);
+            
+            switch(identity) {
+                case '侦探':
+                    skill_zhentan();
+                    break;
+                case '殡仪员':
+                    skill_binyiyuan();
+                    break;
+                case '通灵者':
+                    skill_tonglingzhe();
+                    break;
+                case '追踪者':
+                    skill_zhuizongzhe();
+                    break;
+                case '警长':
+                    skill_jingzhang();
+                    break;
+                case '超能力者':
+                    skill_chaonenglizhe();
+                    break;
+                case '刺客':
+                    skill_cike();
+                    break;
+                case '静语者':
+                    skill_jingyuzhe();
+                    break;
+                case '大忽悠鹅':
+                    skill_biehuyoue();
+                    break;
+                case '间谍':
+                    skill_jiandie();
+                    break;
+                case '乌鸦':
+                    skill_wuya();
+                    break;
+                case '监狱长':
+                    skill_jianyuzhang();
+                    break;
+                case '术士':
+                    skill_shushi();
+                    break;
+                case '告密者':
+                    skill_gaomizhe();
+                    break;
+                case '阵营鹅':
+                    skill_zhenyinge();
+                    break;
+                case '醉酒鸭':
+                    skill_zuijiuya();
+                    break;
+                case '保镖':
+                    skill_baobiao();
+                    break;
+                case '媒婆':
+                    skill_meipo();
+                    break;
+                case '爆炸王':
+                    skill_baozhawang();
+                    break;
+                case '和平鸽':
+                    skill_hepingge();
+                    break;
+                default:
+                    console.log('Invalid identity:', identity);
+                    alert('该身份暂无技能可用');
+                    break;
+            }
+        }
+        </script>
+
+        <!-- 在页面加载完成后初始化 -->
+        <script>
+        $(document).ready(function() {
+            initializeSkill();
+        });
+
+        // 初始化技能
+        function initializeSkill() {
+            const identity = '{$identity}';
+            const skillButton = document.getElementById('skillButton');
+            
+            console.log('Initializing skill for identity:', identity);
+            
+            if (skillButton) {
+                skillButton.onclick = function() {
+                    console.log('Skill button clicked for identity:', identity);
+                    handleSkill(identity);
+                };
+            }
+        }
+
+        // 处理技能
+        function handleSkill(identity) {
+            console.log('Handling skill for identity:', identity);
+            
+            switch(identity) {
+                case '刺客':
+                    skill_cike();
+                    break;
+                case '静语者':
+                    skill_jingyuzhe();
+                    break;
+                case '侦探':
+                    skill_zhentan();
+                    break;
+                case '殡仪员':
+                    skill_binyiyuan();
+                    break;
+                case '通灵者':
+                    skill_tonglingzhe();
+                    break;
+                case '追踪者':
+                    skill_zhuizongzhe();
+                    break;
+                case '警长':
+                    skill_jingzhang();
+                    break;
+                case '超能力者':
+                    skill_chaonenglizhe();
+                    break;
+                case '大忽悠鹅':
+                    skill_biehuyoue();
+                    break;
+                case '间谍':
+                    skill_jiandie();
+                    break;
+                case '乌鸦':
+                    skill_wuya();
+                    break;
+                case '监狱长':
+                    skill_jianyuzhang();
+                    break;
+                case '术士':
+                    skill_shushi();
+                    break;
+                case '告密者':
+                    skill_gaomizhe();
+                    break;
+                case '阵营鹅':
+                    skill_zhenyinge();
+                    break;
+                case '醉酒鸭':
+                    skill_zuijiuya();
+                    break;
+                case '保镖':
+                    skill_baobiao();
+                    break;
+                case '媒婆':
+                    skill_meipo();
+                    break;
+                case '爆炸王':
+                    skill_baozhawang();
+                    break;
+                case '和平鸽':
+                    skill_hepingge();
+                    break;
+                default:
+                    console.log('Invalid identity:', identity);
+                    alert('该身份暂无技能可用');
+                    break;
+            }
+        }
+        </script>
+
+        <!-- 添加身份选择弹窗的HTML结构 -->
+        <div id="mask_identity_select_con_id" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000;"></div>
+        <div id="mask_identity_select_main_id" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; backdrop-filter: blur(5px);">
+            <select id="mask_identity_select" style="font-size: 24px; padding: 10px; border-radius: 5px; background: rgba(255,255,255,0.9); border: 1px solid #FFE4B5; color: #333;">
+                <option value="">请选择身份</option>
+            </select>
+            <div style="margin-top: 20px; display: flex; gap: 20px;">
+                <button onclick="reset_kill_number_method()" style="padding: 10px 20px; border: none; border-radius: 5px; background: #FFE4B5; color: #333; cursor: pointer;">重新选择目标</button>
+                <button onclick="confirm_kill_number_method()" style="padding: 10px 20px; border: none; border-radius: 5px; background: #F5A623; color: white; cursor: pointer;">确认击杀</button>
+            </div>
+        </div>
+
+        <!-- 修改skill_cike函数 -->
+        <script>
+        function skill_cike() {
+            const target = prompt('请输入要击杀的玩家号码');
+            if (target) {
+                cike_or_wuya_kill_number = target;
+                $.ajax({
+                    url: '/index/sendIdentity',
+                    data: {
+                        identity_type: 'cike'
+                    },
+                    type: 'post',
+                    success: function (d, s, x) {
+                        if (s === 'success') {
+                            console.log('Available identities:', d);
+                            $('#mask_identity_select').empty();
+                            
+                            // 添加默认选项
+                            const defaultOption = document.createElement('option');
+                            defaultOption.value = '';
+                            defaultOption.innerHTML = '请选择身份';
+                            $('#mask_identity_select').append(defaultOption);
+                            
+                            // 添加可选身份
+                            for (let i = 0; i < d.length; i++) {
+                                const option = document.createElement('option');
+                                option.value = d[i];
+                                option.innerHTML = d[i];
+                                $('#mask_identity_select').append(option);
+                            }
+                            
+                            // 显示选择弹窗
+                            $('#mask_identity_select_con_id').css('display', 'block');
+                            $('#mask_identity_select_main_id').css('display', 'flex');
+                        }
+                    },
+                    error: function (e) {
+                        console.log('网络错误:', e);
+                    }
+                });
+            }
+        }
+        </script>
+
+        <!-- 添加投票结果显示区域 -->
+        <div class="vote-result-container" style="position: fixed; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 10px; color: #FFE4B5; z-index: 1000;">
+            <div class="vote-count-title" style="font-size: 18px; margin-bottom: 10px; text-align: center;">本轮投票情况：</div>
+            <div id="vote_count_list" style="margin-bottom: 15px;"></div>
+            <div class="vote-out-title" style="font-size: 18px; margin-bottom: 10px; text-align: center;">本轮出局玩家：</div>
+            <div id="vote_out_player" style="text-align: center; font-size: 20px;"></div>
+        </div>
+
+        <script>
+            // 在原有的queryVoteDetail函数中添加票数显示逻辑
+            function queryVoteDetail() {
+                $.ajax({
+                    url: '/index/queryVoteDetail',
+                    type: 'get',
+                    success: function(d) {
+                        if (d !== 'empty') {
+                            // 显示每个玩家获得的票数
+                            let voteCountHtml = '';
+                            for (let player in d.detail) {
+                                voteCountHtml += `<div style="margin: 5px 0;">${player}号玩家：${d.detail[player]}票</div>`;
+                            }
+                            $('#vote_count_list').html(voteCountHtml);
+                            
+                            // 显示出局玩家
+                            if (d.out_player) {
+                                $('#vote_out_player').text(d.out_player + '号玩家');
+                            } else {
+                                $('#vote_out_player').text('平票，无人出局');
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 每秒更新一次投票结果
+            setInterval(queryVoteDetail, 1000);
+        </script>
+
+        <!-- 添加身份面板 -->
+        <div class="identity-panel">
+            <div class="identity-header">
+                <h2>身份信息</h2>
+                <div class="identity-camp">阵营：<span id="playerCamp"></span></div>
+            </div>
+            <div class="identity-content">
+                <div class="identity-avatar">
+                    <img id="roleImage" src="" alt="角色图片">
+                </div>
+                <div class="identity-info">
+                    <div class="identity-name">身份：<span id="playerIdentity"></span></div>
+                    <div class="identity-description" id="roleDescription"></div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+        /* 身份面板样式 */
+        .identity-panel {
+            background: rgba(14, 26, 43, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            color: #fff;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .identity-header {
+            border-bottom: 2px solid #4A90E2;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .identity-header h2 {
+            color: #4A90E2;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        .identity-camp {
+            font-size: 18px;
+            color: #FFE4B5;
+        }
+
+        .identity-content {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .identity-avatar {
+            flex-shrink: 0;
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid #4A90E2;
+        }
+
+        .identity-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .identity-info {
+            flex-grow: 1;
+        }
+
+        .identity-name {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #FFE4B5;
+        }
+
+        .identity-description {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #D3D3D3;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .identity-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .identity-avatar {
+                margin: 0 auto;
+            }
+
+            .identity-info {
+                margin-top: 15px;
+            }
+        }
+        </style>
+
+        <script>
+        // 更新身份信息的函数
+        function updateIdentityInfo(data) {
+            $('#playerCamp').text(data.camp);
+            $('#playerIdentity').text(data.identity);
+            $('#roleImage').attr('src', `/static/identity_img/${data.identity}.png`);
+            
+            // 根据身份设置描述
+            const descriptions = {
+                // 鹅阵营
+                '大白鹅': '最基础的好人阵营角色',
+                '通灵者': '可以查看其他玩家的阵营',
+                '加拿大鹅': '可以发动警报',
+                // ... 其他角色的描述
+            };
+            
+            $('#roleDescription').text(descriptions[data.identity] || '暂无描述');
+        }
+
+        // 在页面加载时获取并显示身份信息
+        $(document).ready(function() {
+            $.ajax({
+                url: '/index/sendIdentity',
+                type: 'get',
+                success: function(data) {
+                    if (data && data.identity) {
+                        updateIdentityInfo(data);
+                    }
+                }
+            });
+        });
+        </script>
+
+        <!-- 添加历史对局按钮样式 -->
+        <style>
+        .user-actions {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .history-btn {
+            background: linear-gradient(145deg, #F5A623, #F7B946);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(245, 166, 35, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .history-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 24px;
+        }
+
+        .btn-text {
+            font-weight: 500;
+        }
+        </style>
+
+        <!-- 添加历史对局按钮跳转脚本 -->
+        <script>
+        function showHistory() {
+            window.location.href = '/index/matchHistory';
+        }
+        </script>
+
+        <!-- 修改检查是否开始投票的函数 -->
+        <script>
+        function checkIfStartVote() {
+            $.ajax({
+                url: '/index/queryIfStartVote',
+                type: 'get',
+                success: function(res) {
+                    console.log('Vote check response:', res);  // 添加日志
+                    if (res === 'start') {  // 修改这里，直接判断返回值
+                        window.location.href = '/index/vote';
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Vote check error:', error);
+                }
+            });
+        }
+
+        // 修改投票按钮的点击事件处理
+        $('#voteBtn').click(function() {
+            // 移除阵营判断，允许所有人点击投票
+            checkIfStartVote();
+        });
+
+        // 如果有定时检查投票状态的代码，也需要修改
+        function checkVoteStatus() {
+            $.ajax({
+                url: '/index/queryIfStartVote',
+                type: 'get',
+                success: function(res) {
+                    if (res === 'start') {  // 修改这里，直接判断返回值
+                        window.location.href = '/index/vote';
+                    }
+                }
+            });
+        }
+        </script>
+
+        <!-- 更新用户状态信息 -->
+        <script>
+        function updateUserStats() {
+            $.ajax({
+                url: '/index/getUserStats',
+                type: 'get',
+                success: function(response) {
+                    if (response.code === 0) {
+                        $('#userLevel').text(response.data.level);
+                        $('#userCoins').text(response.data.coins);
+                        $('#userSilver').text(response.data.silver_coins);
+                    }
+                }
+            });
+        }
+        
+        // 定期更新用户状态
+        $(document).ready(function() {
+            updateUserStats();
+            setInterval(updateUserStats, 30000); // 每30秒更新一次
+        });
+        </script>
+
+        <!-- 在投票页面部分添加票型按钮和面板 -->
+        <div class="vote-con" id="vote-con-id">
+            <!-- 修改投票信息按钮和面板 -->
+            <button class="vote-info-btn" onclick="toggleVoteInfo()">
+                查看投票情况
+            </button>
+
+            <div class="vote-info-panel" id="vote-info-panel">
+                <div class="vote-info-section">
+                    <div class="vote-info-title">本轮投票情况</div>
+                    <div id="vote-count-list"></div>
+                </div>
+                <div class="vote-info-section">
+                    <div class="vote-info-title">出局玩家</div>
+                    <div id="vote-out-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function toggleVoteInfo() {
+                const panel = document.getElementById('vote-info-panel');
+                panel.classList.toggle('show');
+                if (panel.classList.contains('show')) {
+                    update_vote_stat();
+                }
+            }
+
+            function update_vote_stat() {
+                $.ajax({
+                    url: '/index/queryVoteDetail',
+                    type: 'get',
+                    success: function(data) {
+                        if (data) {
+                            // 格式化投票数据显示
+                            let voteCountHtml = '';
+                            if (data.vote_count_html) {
+                                voteCountHtml = data.vote_count_html.replace(/\n/g, '<br>');
+                            }
+                            
+                            // 格式化出局玩家数据显示
+                            let voteOutHtml = '';
+                            if (data.vote_out_html) {
+                                voteOutHtml = data.vote_out_html.replace(/\n/g, '<br>');
+                            }
+                            
+                            $('#vote-count-list').html(voteCountHtml);
+                            $('#vote-out-list').html(voteOutHtml);
+                        }
+                    }
+                });
+            }
+
+            // 定期更新投票信息
+            setInterval(function() {
+                if (document.getElementById('vote-info-panel').classList.contains('show')) {
+                    update_vote_stat();
+                }
+            }, 3000);
+        </script>
+
+        <script>
+            // 更新用户状态信息
+            function updateUserStats() {
+                $.ajax({
+                    url: '/index/getUserStats',
+                    type: 'get',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            $('#userLevel').text(response.data.level);
+                            $('#userCoins').text(response.data.coins);
+                            $('#userSilver').text(response.data.silver_coins);
+                        }
+                    }
+                });
+            }
+
+            // 页面加载时初始化
+            $(document).ready(function() {
+                updateUserStats();
+                setInterval(updateUserStats, 30000); // 每30秒更新一次
+            });
+        </script>
+    </html>

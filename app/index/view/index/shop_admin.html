@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商城管理</title>
+    <script src="/static/jquery/jquery-3.3.1.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Microsoft YaHei", sans-serif;
+            background: #1a1a1a;
+            color: #FFE4B5;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 2px solid rgba(245, 166, 35, 0.3);
+        }
+
+        .title {
+            color: #F5A623;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .add-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #45a049;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.1);
+        }
+
+        .items-table th {
+            background: rgba(245, 166, 35, 0.2);
+            color: #F5A623;
+            font-weight: bold;
+        }
+
+        .items-table tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .item-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #1976D2;
+        }
+
+        .toggle-btn {
+            background: #FF9800;
+            color: white;
+        }
+
+        .toggle-btn:hover {
+            background: #F57C00;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background: #1a1a1a;
+            margin: 50px auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 10px;
+            border: 1px solid rgba(245, 166, 35, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #F5A623;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(245, 166, 35, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFE4B5;
+        }
+
+        .form-group input[type="file"] {
+            padding: 5px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #9e9e9e;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">商城管理</div>
+            <button class="add-btn" onclick="showAddModal()">添加商品</button>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>图片</th>
+                    <th>名称</th>
+                    <th>价格</th>
+                    <th>分类</th>
+                    <th>库存</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="itemsList">
+                <!-- 商品列表将通过 JavaScript 动态加载 -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 添加/编辑商品模态框 -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle" style="color: #F5A623; margin-bottom: 20px;">添加商品</h2>
+            <form id="itemForm">
+                <input type="hidden" id="itemId">
+                <div class="form-group">
+                    <label>商品名称</label>
+                    <input type="text" id="itemName" required>
+                </div>
+                <div class="form-group">
+                    <label>价格</label>
+                    <input type="number" id="itemPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>分类</label>
+                    <select id="itemCategory" required>
+                        <option value="avatar">头像</option>
+                        <option value="frame">边框</option>
+                        <option value="effect">特效</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>库存</label>
+                    <input type="number" id="itemStock" required>
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="itemDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>图片</label>
+                    <input type="file" id="itemImage" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="itemIsNew">
+                        新品
+                    </label>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn cancel-btn" onclick="closeModal()">取消</button>
+                    <button type="submit" class="modal-btn save-btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 加载商品列表
+        function loadItems() {
+            $.ajax({
+                url: '/index/getShopItemsAdmin',
+                type: 'get',
+                success: function(response) {
+                    if (response.code === 0) {
+                        const itemsList = $('#itemsList');
+                        itemsList.empty();
+                        
+                        response.data.forEach(item => {
+                            itemsList.append(`
+                                <tr>
+                                    <td><img src="${item.image}" class="item-image" alt="${item.name}"></td>
+                                    <td>${item.name}</td>
+                                    <td>${item.price}</td>
+                                    <td>${getCategoryName(item.category)}</td>
+                                    <td>${item.stock}</td>
+                                    <td>${item.status === 1 ? '上架' : '下架'}</td>
+                                    <td>
+                                        <button class="action-btn edit-btn" onclick="editItem(${item.id})">编辑</button>
+                                        <button class="action-btn toggle-btn" onclick="toggleItem(${item.id}, ${item.status})">${item.status === 1 ? '下架' : '上架'}</button>
+                                        <button class="action-btn delete-btn" onclick="deleteItem(${item.id})">删除</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    }
+                }
+            });
+        }
+
+        function getCategoryName(category) {
+            const categories = {
+                'avatar': '头像',
+                'frame': '边框',
+                'effect': '特效'
+            };
+            return categories[category] || category;
+        }
+
+        // 显示添加商品模态框
+        function showAddModal() {
+            $('#modalTitle').text('添加商品');
+            $('#itemId').val('');
+            $('#itemForm')[0].reset();
+            $('#itemModal').show();
+        }
+
+        // 编辑商品
+        function editItem(id) {
+            $.ajax({
+                url: '/index/getShopItem',
+                type: 'get',
+                data: { id: id },
+                success: function(response) {
+                    if (response.code === 0) {
+                        const item = response.data;
+                        $('#modalTitle').text('编辑商品');
+                        $('#itemId').val(item.id);
+                        $('#itemName').val(item.name);
+                        $('#itemPrice').val(item.price);
+                        $('#itemCategory').val(item.category);
+                        $('#itemStock').val(item.stock);
+                        $('#itemDescription').val(item.description);
+                        $('#itemIsNew').prop('checked', item.is_new === 1);
+                        $('#itemModal').show();
+                    }
+                }
+            });
+        }
+
+        // 上架/下架商品
+        function toggleItem(id, currentStatus) {
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            $.ajax({
+                url: '/index/toggleShopItem',
+                type: 'post',
+                data: { id: id, status: newStatus },
+                success: function(response) {
+                    if (response.code === 0) {
+                        loadItems();
+                    } else {
+                        alert(response.msg || '操作失败');
+                    }
+                }
+            });
+        }
+
+        // 删除商品
+        function deleteItem(id) {
+            if (confirm('确定要删除这个商品吗？')) {
+                $.ajax({
+                    url: '/index/deleteShopItem',
+                    type: 'post',
+                    data: { id: id },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            loadItems();
+                        } else {
+                            alert(response.msg || '删除失败');
+                        }
+                    }
+                });
+            }
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            $('#itemModal').hide();
+        }
+
+        // 提交表单
+        $('#itemForm').on('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('id', $('#itemId').val());
+            formData.append('name', $('#itemName').val());
+            formData.append('price', $('#itemPrice').val());
+            formData.append('category', $('#itemCategory').val());
+            formData.append('stock', $('#itemStock').val());
+            formData.append('description', $('#itemDescription').val());
+            formData.append('is_new', $('#itemIsNew').is(':checked') ? 1 : 0);
+            
+            const imageFile = $('#itemImage')[0].files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            $.ajax({
+                url: '/index/saveShopItem',
+                type: 'post',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.code === 0) {
+                        closeModal();
+                        loadItems();
+                    } else {
+                        alert(response.msg || '保存失败');
+                    }
+                }
+            });
+        });
+
+        // 点击模态框外部关闭
+        $('#itemModal').on('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // 页面加载时执行
+        $(document).ready(function() {
+            loadItems();
+        });
+    </script>
+</body>
+</html> 
